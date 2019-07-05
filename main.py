@@ -92,8 +92,8 @@ class CMakeCreator:
         file.write('target_include_directories(${PROJECT_NAME}\n')
         file.write('    PRIVATE\n')
         for include in build_data.list_of_includes:
-            cmake.write('    \"')
-            cmake.write(include.replace('\\', '/'))
+            file.write('    \"')
+            file.write(include.replace('\\', '/'))
             cmake.write('\"\n')
 
         cmake.write(')\n')
