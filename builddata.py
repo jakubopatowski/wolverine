@@ -48,3 +48,9 @@ class BuildData:
     # sources
     def set_sources(self, sources):
         self.list_of_sources = sources
+
+    def set_libs(self, libs):
+        self.list_of_libs = libs
+
+    def set_lib_paths(self, lib_paths):
+        self.list_of_lib_paths = lib_paths

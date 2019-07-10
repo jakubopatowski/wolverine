@@ -11,11 +11,14 @@ class MakefileParser:
     defines_pattern = 'DEFINES\\s*=\\s*(.*)'
     define_pattern = '-D(\\S*)'
     cxx_flags_pattern = 'CXXFLAGS\\s*=\\s(.*)'
-    cxx_flag_pattern = '(?:^|\\s)([^\\$\\s]\\S*[^\\$\\s])'
+    flag_pattern = '(?:^|\\s)([^\\$\\s]\\S*[^\\$\\s])'
     includes_pattern = 'INCPATH\\s*=\\s(.*)'
     include_pattern = '\\"(\\S*)\\"'
     target_type_pattern = '\\#\\s*Template:\\s*([\\w]*)'
     sources_pattern = 'SOURCES\\s*=\\s*(.*)'
+    libs_pattern = 'LIBS\\s*=\\s*(.*)'
+    libpath_pattern = 'LIBPATH:([\\S]*)'
+    entry_pattern = '([\\S]*)'
 
     def __init__(self, project_path, verbose):
         assert isinstance(project_path, str)
@@ -75,15 +78,23 @@ class MakefileParser:
             if(self.verbose):
                 print('list_of_defines:', result.list_of_defines)
 
-            # cxx flags
-            cxx_flags = re.findall(self.cxx_flags_pattern, makefile_data)
-            result.set_flags(re.findall(self.cxx_flag_pattern, cxx_flags[0]))
+            # flags
+            flags = re.findall(self.cxx_flags_pattern, makefile_data)
+            result.set_flags(re.findall(self.flag_pattern, flags[0]))
             if(self.verbose):
-                print('list_of_cxx_flags:', result.list_of_flags)
+                print('list_of_flags:', result.list_of_flags)
 
             # includes
             includes = re.findall(self.includes_pattern, makefile_data)
-            result.set_includes(re.findall(self.include_pattern, includes[0]))
+            list_of_includes = re.findall(self.include_pattern, includes[0])
+            includes = []
+            for include in list_of_includes:
+                full_path = os.path.normpath(os.path.join(makefile_dir,
+                                                          include))
+                full_path = os.path.relpath(full_path, project_path)
+                includes.append(full_path)
+
+            result.set_includes(includes)
             if(self.verbose):
                 print('list_of_includes:', result.list_of_includes)
 
@@ -99,5 +110,24 @@ class MakefileParser:
             result.set_sources(list_of_sources)
             if(self.verbose):
                 print('list_of_sources', result.list_of_sources)
+
+            # libraries
+            libraries = re.findall(self.libs_pattern, makefile_data)
+            print('libraries: ', libraries)
+            library_list = re.findall(self.entry_pattern, libraries[0])
+            libpath_list = []
+            libs_list = []
+            for entry in library_list:
+                print(entry)
+                if re.match(self.libpath_pattern, entry):
+                    libpath_list.append(entry)
+                else:
+                    libs_list.append(entry)
+
+            result.set_libs(libs_list)
+            result.set_lib_paths(libpath_list)
+
+            print('list of libs: ', libs_list)
+            print('list of lib paths: ', libpath_list)
 
             return result

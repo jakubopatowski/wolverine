@@ -5,7 +5,8 @@ import os
 
 project_path = os.path.join('c:\\', 'Projekty', 'trunk', 'src')
 makefile_parser = makefileparser.MakefileParser(project_path, False)
-subprojects_list = makefile_parser.get_subprojects()
+# subprojects_list = makefile_parser.get_subprojects()
+subprojects_list = ['rvs_espim']
 
 for subproject in subprojects_list:
     print('analyzing: ', subproject)
@@ -18,4 +19,3 @@ for subproject in subprojects_list:
     build_data = makefile_parser.parse_file(makefile_path, subproject_path)
     cmake = cmakecreator.CMakeCreator()
     cmake.create_project(subproject_path, build_data)
-    # makefile_parser.make_cmake(build_data)
