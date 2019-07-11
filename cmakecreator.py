@@ -89,7 +89,30 @@ class CMakeCreator:
             file.write(include.replace('\\', '/'))
             file.write('\"\n')
 
-        file.write(')\n')
+        file.write(')\n\n')
+
+    def __add_link_dirs(self, file, link_dirs):
+        assert isinstance(file, IOBase)
+
+        file.write('target_link_directories(${PROJECT_NAME}\n')
+        file.write('  PRIVATE\n')
+        for link_dir in link_dirs:
+            file.write('    "')
+            file.write(link_dir.replace('\\', '/'))
+            file.write('"\n')
+
+        file.write(')\n\n')
+
+    def __add_libs(self, file, libs):
+        assert isinstance(file, IOBase)
+
+        file.write('target_link_libraries(${PROJECT_NAME}\n')
+        for lib in libs:
+            file.write('    ')
+            file.write(lib)
+            file.write('\n')
+
+        file.write(')\n\n')
 
     def create_project(self, path, build_data):
         assert isinstance(path, str)
@@ -109,5 +132,9 @@ class CMakeCreator:
         self.__add_defines(file, build_data.list_of_defines)
         self.__export_commands(file)
         self.__add_includes(file, build_data.list_of_includes)
+        if build_data.list_of_lib_paths:
+            self.__add_link_dirs(file, build_data.list_of_lib_paths)
+        if build_data.list_of_libs:
+            self.__add_libs(file, build_data.list_of_libs)
 
         file.close()

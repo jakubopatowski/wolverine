@@ -5,8 +5,8 @@ import os
 
 project_path = os.path.join('c:\\', 'Projekty', 'trunk', 'src')
 makefile_parser = makefileparser.MakefileParser(project_path, False)
-# subprojects_list = makefile_parser.get_subprojects()
-subprojects_list = ['rvs_espim']
+subprojects_list = makefile_parser.get_subprojects()
+# subprojects_list = ['rvs_espim']
 
 for subproject in subprojects_list:
     print('analyzing: ', subproject)

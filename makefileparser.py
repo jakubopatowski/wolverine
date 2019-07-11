@@ -17,8 +17,8 @@ class MakefileParser:
     target_type_pattern = '\\#\\s*Template:\\s*([\\w]*)'
     sources_pattern = 'SOURCES\\s*=\\s*(.*)'
     libs_pattern = 'LIBS\\s*=\\s*(.*)'
-    libpath_pattern = 'LIBPATH:([\\S]*)'
-    entry_pattern = '([\\S]*)'
+    libpath_pattern = '\\/LIBPATH:(\\S*)'
+    entry_pattern = '\\S*'
 
     def __init__(self, project_path, verbose):
         assert isinstance(project_path, str)
@@ -113,21 +113,34 @@ class MakefileParser:
 
             # libraries
             libraries = re.findall(self.libs_pattern, makefile_data)
-            print('libraries: ', libraries)
-            library_list = re.findall(self.entry_pattern, libraries[0])
-            libpath_list = []
-            libs_list = []
-            for entry in library_list:
-                print(entry)
-                if re.match(self.libpath_pattern, entry):
-                    libpath_list.append(entry)
-                else:
-                    libs_list.append(entry)
+            if not libraries:
+                if self.verbose:
+                    print("There are no libraries!")
+            else:
+                print('libraries: ', libraries)
+                library_list = libraries[0].split()
+                print('library_list: ', library_list)
+                libpath_list = []
+                libs_list = []
+                for entry in library_list:
+                    if re.search('.res', entry) is not None:
+                        continue
 
-            result.set_libs(libs_list)
-            result.set_lib_paths(libpath_list)
+                    libpath = re.search(self.libpath_pattern, entry)
 
-            print('list of libs: ', libs_list)
-            print('list of lib paths: ', libpath_list)
+                    if libpath is None:
+                        libs_list.append(entry)
+                    else:
+                        path = libpath.group(1)
+                        full_path = os.path.normpath(
+                            os.path.join(makefile_dir, path))
+                        full_path = os.path.relpath(full_path, project_path)
+                        libpath_list.append(full_path)
+
+                        result.set_libs(libs_list)
+                        result.set_lib_paths(libpath_list)
+
+                        print('list of libs: ', libs_list)
+                        print('list of lib paths: ', libpath_list)
 
             return result

@@ -9,6 +9,19 @@ class BuildData:
     to build process.
     """
 
+    def __init__(self):
+        "docstring"
+        self.makefile_path = None
+        self.project_path = None
+        self.target = None
+        self.target_type = None
+        self.list_of_defines = None
+        self.list_of_flags = None
+        self.list_of_includes = None
+        self.list_of_sources = None
+        self.list_of_libs = None
+        self.list_of_lib_paths = None
+
     # path to makefile
     def set_makefile_path(self, path):
         self.makefile_path = path
