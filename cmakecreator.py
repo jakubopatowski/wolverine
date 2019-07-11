@@ -138,3 +138,18 @@ class CMakeCreator:
             self.__add_libs(file, build_data.list_of_libs)
 
         file.close()
+
+    def create_main_project(self, path, subprojects):
+        assert isinstance(path, str)
+
+        file = open(os.path.join(path, 'CMakeLists.txt'), 'w')
+        self.__prepare_header(file)
+
+        for project in subprojects:
+            project_path = os.path.join(path, project)
+            if os.path.isfile(os.path.join(project_path, 'CMakeLists.txt')):
+                file.write('add_subdirectory(')
+                file.write(project)
+                file.write(')\n')
+
+        file.close()

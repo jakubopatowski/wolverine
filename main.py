@@ -19,3 +19,6 @@ for subproject in subprojects_list:
     build_data = makefile_parser.parse_file(makefile_path, subproject_path)
     cmake = cmakecreator.CMakeCreator()
     cmake.create_project(subproject_path, build_data)
+
+main_cmake = cmakecreator.CMakeCreator()
+main_cmake.create_main_project(project_path, subprojects_list)
