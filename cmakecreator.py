@@ -91,6 +91,14 @@ class CMakeCreator:
 
         file.write(')\n\n')
 
+    def __add_ccache(self, file):
+        assert isinstance(file, IOBase)
+
+        file.write('find_program(CCACHE_PROGRAM ccache)\n')
+        file.write('if(CCACHE_PROGRAM)\n')
+        file.write('    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")\n')
+        file.write('endif()\n\n')
+
     def __add_link_dirs(self, file, link_dirs):
         assert isinstance(file, IOBase)
 
@@ -131,6 +139,7 @@ class CMakeCreator:
         self.__add_flags(file, build_data.list_of_flags)
         self.__add_defines(file, build_data.list_of_defines)
         self.__export_commands(file)
+        self.__add_ccache(file)
         self.__add_includes(file, build_data.list_of_includes)
         if build_data.list_of_lib_paths:
             self.__add_link_dirs(file, build_data.list_of_lib_paths)
