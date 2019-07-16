@@ -20,19 +20,11 @@ class MakefileParser:
     libpath_pattern = '\\/LIBPATH:(\\S*)'
     entry_pattern = '\\S*'
 
-    def __init__(self, project_path, verbose):
+    def __init__(self, project_path):
         assert isinstance(project_path, str)
-        assert isinstance(verbose, bool)
-        self.project_path = project_path
-        self.verbose = verbose
-        self.subprojects = []
 
-    def get_subprojects(self):
-        path = os.path.join('c:\\', 'Projekty', 'trunk',
-                            'win32-msvc2015_d')
-        return [name for name in os.listdir(path)
-                if os.path.isfile(os.path.join(path, name, 'qt4',
-                                               'makefile'))]
+        self.project_path = project_path
+        self.subprojects = []
 
     def parse_file(self, makefile_path, project_path):
         assert isinstance(makefile_path, str)

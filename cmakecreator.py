@@ -38,6 +38,16 @@ class CMakeCreator:
         file.write('endif()\n')
         file.write('\n')
 
+    def __add_dir_mimic(self, file, project_path):
+        assert isinstance(file, IOBase)
+        assert isinstance(project_path, str)
+
+        file.write('source_group(TREE ')
+        path = os.path.join(project_path, '../..')
+        path = os.path.normpath(path)
+        file.write(path.replace('\\', '/'))
+        file.write(' PREFIX "Source" FILES ${project_sources})\n\n')
+
     def __add_defines(self, file, defines):
         assert isinstance(file, IOBase)
 
@@ -122,6 +132,14 @@ class CMakeCreator:
 
         file.write(')\n\n')
 
+    def __add_target_features(self, file):
+        assert isinstance(file, IOBase)
+
+        file.write('target_compile_features(${PROJECT_NAME} ')
+        file.write('PRIVATE cxx_std_11)\n')
+        file.write('set_target_properties(${PROJECT_NAME} ')
+        file.write('PROPERTIES CXX_EXTENSIONS OFF)\n\n')
+
     def create_project(self, path, build_data):
         assert isinstance(path, str)
         assert isinstance(build_data, builddata.BuildData)
@@ -135,11 +153,13 @@ class CMakeCreator:
         self.__prepare_header(file)
         self.__prepare_project(file, build_data.target)
         self.__add_sources(file, build_data.list_of_sources)
+        self.__add_dir_mimic(file, build_data.project_path)
         self.__add_target(file, build_data.target_type)
         self.__add_flags(file, build_data.list_of_flags)
         self.__add_defines(file, build_data.list_of_defines)
         self.__export_commands(file)
         self.__add_ccache(file)
+        self.__add_target_features(file)
         self.__add_includes(file, build_data.list_of_includes)
         if build_data.list_of_lib_paths:
             self.__add_link_dirs(file, build_data.list_of_lib_paths)

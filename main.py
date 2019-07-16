@@ -4,14 +4,18 @@ import os
 
 
 project_path = os.path.join('c:\\', 'Projekty', 'trunk', 'src')
-makefile_parser = makefileparser.MakefileParser(project_path, False)
-subprojects_list = makefile_parser.get_subprojects()
+project2_path = os.path.join('c:\\', 'Projekty', 'trunk',
+                             'win32-msvc2015_d')
+makefile_parser = makefileparser.MakefileParser(project_path)
+
+subprojects_list = [name for name in os.listdir(project2_path)
+                    if os.path.isfile(os.path.join(project2_path, name, 'qt4',
+                                                   'makefile'))]
 # subprojects_list = ['rvs_espim']
 
 for subproject in subprojects_list:
     print('analyzing: ', subproject)
-    makefile_path = os.path.join('c:\\', 'Projekty', 'trunk',
-                                 'win32-msvc2015_d', subproject, 'qt4',
+    makefile_path = os.path.join(project2_path, subproject, 'qt4',
                                  'makefile')
     subproject_path = os.path.join('c:\\', 'Projekty', 'trunk', 'src',
                                    subproject)
