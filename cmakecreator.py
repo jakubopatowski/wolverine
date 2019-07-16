@@ -95,8 +95,8 @@ class CMakeCreator:
         assert isinstance(file, IOBase)
 
         file.write('find_program(CCACHE_PROGRAM ccache)\n')
-        file.write('if(CCACHE_PROGRAM)\n')
-        file.write('    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")\n')
+        file.write('if(CCACHE_FOUND)\n')
+        file.write('  set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")\n')
         file.write('endif()\n\n')
 
     def __add_link_dirs(self, file, link_dirs):

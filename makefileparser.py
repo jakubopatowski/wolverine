@@ -27,11 +27,6 @@ class MakefileParser:
         self.verbose = verbose
         self.subprojects = []
 
-    def make_main_cmake(self):
-        print(self.project_path)
-        file = open(os.path.join(self.project_path, 'CMakeLists.txt'), 'w')
-        file.write()
-
     def get_subprojects(self):
         path = os.path.join('c:\\', 'Projekty', 'trunk',
                             'win32-msvc2015_d')
@@ -63,26 +58,18 @@ class MakefileParser:
             # targets
             targets = re.findall(self.target_pattern, makefile_data)
             result.set_target_name(targets[0])
-            if(self.verbose):
-                print('list_of_targets:', result.target)
 
             # target type
             target_type = re.findall(self.target_type_pattern, makefile_data)
             result.set_target_type(target_type[0])
-            if(self.verbose):
-                print('target_type:', result.target_type)
 
             # defines
             defines = re.findall(self.defines_pattern, makefile_data)
             result.set_defines(re.findall(self.define_pattern, defines[0]))
-            if(self.verbose):
-                print('list_of_defines:', result.list_of_defines)
 
             # flags
             flags = re.findall(self.cxx_flags_pattern, makefile_data)
             result.set_flags(re.findall(self.flag_pattern, flags[0]))
-            if(self.verbose):
-                print('list_of_flags:', result.list_of_flags)
 
             # includes
             includes = re.findall(self.includes_pattern, makefile_data)
@@ -95,8 +82,6 @@ class MakefileParser:
                 includes.append(full_path)
 
             result.set_includes(includes)
-            if(self.verbose):
-                print('list_of_includes:', result.list_of_includes)
 
             # sources
             sources = re.findall(self.sources_pattern, makefile_data)
@@ -108,18 +93,13 @@ class MakefileParser:
                 list_of_sources.append(full_path)
 
             result.set_sources(list_of_sources)
-            if(self.verbose):
-                print('list_of_sources', result.list_of_sources)
 
             # libraries
             libraries = re.findall(self.libs_pattern, makefile_data)
             if not libraries:
-                if self.verbose:
-                    print("There are no libraries!")
+                print("There are no libraries!")
             else:
-                print('libraries: ', libraries)
                 library_list = libraries[0].split()
-                print('library_list: ', library_list)
                 libpath_list = []
                 libs_list = []
                 for entry in library_list:
@@ -139,8 +119,5 @@ class MakefileParser:
 
                         result.set_libs(libs_list)
                         result.set_lib_paths(libpath_list)
-
-                        print('list of libs: ', libs_list)
-                        print('list of lib paths: ', libpath_list)
 
             return result
