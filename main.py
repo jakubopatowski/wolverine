@@ -15,14 +15,12 @@ subprojects_list = [name for name in os.listdir(project2_path)
 
 for subproject in subprojects_list:
     print('analyzing: ', subproject)
-    makefile_path = os.path.join(project2_path, subproject, 'qt4',
-                                 'makefile')
-    subproject_path = os.path.join('c:\\', 'Projekty', 'trunk', 'src',
-                                   subproject)
+    makef_path = os.path.join(project2_path, subproject, 'qt4', 'makefile')
+    sub_path = os.path.join(project_path, subproject)
 
-    build_data = makefile_parser.parse_file(makefile_path, subproject_path)
+    build_data = makefile_parser.parse_file(makef_path, sub_path)
     cmake = cmakecreator.CMakeCreator()
-    cmake.create_project(subproject_path, build_data)
+    cmake.create_project(sub_path, build_data)
 
 main_cmake = cmakecreator.CMakeCreator()
 main_cmake.create_main_project(project_path, subprojects_list)
