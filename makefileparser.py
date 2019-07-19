@@ -1,7 +1,7 @@
 import re
 import os
 import builddata
-
+import logging
 
 class MakefileParser:
 
@@ -31,6 +31,7 @@ class MakefileParser:
 
         self.subprojects.append(project_path)
         if os.path.isfile(makefile_path):
+            logging.info('makefile exists')
             with open(makefile_path) as makefile:
                 makefile_data = makefile.read()
 
@@ -113,3 +114,5 @@ class MakefileParser:
                         result.set_lib_paths(libpath_list)
 
             return result
+
+        logging.error('Makefile does not exists!')

@@ -1,6 +1,7 @@
 import builddata
 import os
 from io import IOBase
+import logging
 
 
 class CMakeCreator:
@@ -123,7 +124,7 @@ class CMakeCreator:
 
     def __add_libs(self, file, libs):
         assert isinstance(file, IOBase)
-
+        logging.info('libs: %s', libs.exc_info)
         file.write('target_link_libraries(${PROJECT_NAME}\n')
         for lib in libs:
             file.write('    ')

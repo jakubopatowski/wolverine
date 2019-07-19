@@ -1,4 +1,5 @@
 from enum import Enum
+import logging
 
 
 class BuildData:
@@ -15,12 +16,37 @@ class BuildData:
         self.project_path = None
         self.target = None
         self.target_type = None
-        self.list_of_defines = None
-        self.list_of_flags = None
-        self.list_of_includes = None
-        self.list_of_sources = None
-        self.list_of_libs = None
-        self.list_of_lib_paths = None
+        self.list_of_defines = []
+        self.list_of_flags = []
+        self.list_of_includes = []
+        self.list_of_sources = []
+        self.list_of_libs = []
+        self.list_of_lib_paths = []
+        self.is_there_boost = False
+        self.list_of_boost_libs = []
+        self.is_there_qt = False
+        self.list_of_qt_targets = []
+        self.__valid_qt_libs = {'QtCore', 'QtGui', 'Qt3Support',
+                                'QtAssistant', 'QtAssistantClient',
+                                'QAxContainer', 'QAxServer', 'QtDBus',
+                                'QtDesigner', 'QtDesignerComponents',
+                                'QtHelp', 'QtMotif', 'QtMultimedia',
+                                'QtNetwork', 'QtNsPLugin', 'QtOpenGL',
+                                'QtScript', 'QtScriptTools', 'QtSql',
+                                'QtSvg', 'QtTest', 'QtUiTools', 'QtWebKit',
+                                'QtXml', 'QtXmlPatterns', 'phonon'}
+
+    def get_qt_target(self, lib):
+        assert isinstance(lib, str)
+
+        if 'd.lib' in lib:
+            result = lib.replace('d.lib', '')
+            if result in self.__valid_qt_libs:
+                self.is_there_qt = True
+                self.list_of_qt_targets.append(result)
+                return 'Qt4::' + result
+
+        return lib
 
     # path to makefile
     def set_makefile_path(self, path):
@@ -63,7 +89,11 @@ class BuildData:
         self.list_of_sources = sources
 
     def set_libs(self, libs):
-        self.list_of_libs = libs
+        logging.info('set libs: %s', str(libs.__dict__))
+        for item in libs:
+            lib = self.get_qt_target(item)
+            print(lib)
+            self.list_of_libs.append(lib)
 
     def set_lib_paths(self, lib_paths):
         self.list_of_lib_paths = lib_paths
