@@ -29,6 +29,34 @@ class TestBuildData(unittest.TestCase):
         self.assertEqual(self.bd.get_qt_target('QtAxServerd.lib'),
                          'QtAxServerd.lib')
         self.assertEqual(self.bd.get_qt_target('QtDBusd.lib'), 'Qt4::QtDBus')
+        self.assertEqual(self.bd.get_qt_target('QtDesignerd.lib'),
+                         'Qt4::QtDesigner')
+        self.assertEqual(self.bd.get_qt_target('QtDesignerComponentsd.lib'),
+                         'Qt4::QtDesignerComponents')
+        self.assertEqual(self.bd.get_qt_target('QtHelpd.lib'), 'Qt4::QtHelp')
+        self.assertEqual(self.bd.get_qt_target('QtMotifd.lib'), 'Qt4::QtMotif')
+        self.assertEqual(self.bd.get_qt_target('QtMultimediad.lib'),
+                         'Qt4::QtMultimedia')
+        self.assertEqual(self.bd.get_qt_target('QtNetworkd.lib'),
+                         'Qt4::QtNetwork')
+        self.assertEqual(self.bd.get_qt_target('QtNsPlugind.lib'),
+                         'Qt4::QtNsPlugin')
+        self.assertEqual(self.bd.get_qt_target('QtOpenGLd.lib'),
+                         'Qt4::QtOpenGL')
+        self.assertEqual(self.bd.get_qt_target('QtScriptd.lib'),
+                         'Qt4::QtScript')
+        self.assertEqual(self.bd.get_qt_target('QtScriptToolsd.lib'),
+                         'Qt4::QtScriptTools')
+        self.assertEqual(self.bd.get_qt_target('QtSqld.lib'), 'Qt4::QtSql')
+        self.assertEqual(self.bd.get_qt_target('QtSvgd.lib'), 'Qt4::QtSvg')
+        self.assertEqual(self.bd.get_qt_target('QtTestd.lib'), 'Qt4::QtTest')
+        self.assertEqual(self.bd.get_qt_target('QtUiToolsd.lib'),
+                         'Qt4::QtUiTools')
+        self.assertEqual(self.bd.get_qt_target('QtWebKitd.lib'),
+                         'Qt4::QtWebKit')
+        self.assertEqual(self.bd.get_qt_target('QtXmld.lib'), 'Qt4::QtXml')
+        self.assertEqual(self.bd.get_qt_target('QtXmlPatternsd.lib'),
+                         'Qt4::QtXmlPatterns')
 
 
 if __name__ == '__main__':

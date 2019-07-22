@@ -1,5 +1,4 @@
 from enum import Enum
-import logging
 
 
 class BuildData:
@@ -31,7 +30,7 @@ class BuildData:
                                 'QAxContainer', 'QAxServer', 'QtDBus',
                                 'QtDesigner', 'QtDesignerComponents',
                                 'QtHelp', 'QtMotif', 'QtMultimedia',
-                                'QtNetwork', 'QtNsPLugin', 'QtOpenGL',
+                                'QtNetwork', 'QtNsPlugin', 'QtOpenGL',
                                 'QtScript', 'QtScriptTools', 'QtSql',
                                 'QtSvg', 'QtTest', 'QtUiTools', 'QtWebKit',
                                 'QtXml', 'QtXmlPatterns', 'phonon'}
@@ -89,7 +88,6 @@ class BuildData:
         self.list_of_sources = sources
 
     def set_libs(self, libs):
-        logging.info('set libs: %s', str(libs.__dict__))
         for item in libs:
             lib = self.get_qt_target(item)
             print(lib)
