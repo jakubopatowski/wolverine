@@ -88,6 +88,7 @@ class BuildData:
         self.list_of_sources = sources
 
     def set_libs(self, libs):
+        print('libs: ', libs)
         for item in libs:
             lib = self.get_qt_target(item)
             print(lib)

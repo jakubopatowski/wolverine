@@ -1,7 +1,6 @@
 import re
 import os
 import builddata
-import logging
 
 
 class MakefileParser:
@@ -44,7 +43,6 @@ class MakefileParser:
         if not os.path.isfile(makefile_path):
             return None
 
-        logging.info('makefile exists')
         with open(makefile_path) as makefile:
             makefile_data = makefile.read()
 
@@ -93,24 +91,27 @@ class MakefileParser:
         # libraries
         libraries = re.findall(self.libs_pattern, makefile_data)
 
+        print('libraries:', libraries)
         if not libraries:
             print("There are no libraries!")
         else:
             library_list = libraries[0].split()
             libpath_list = []
             libs_list = []
+            print('library_list:', library_list)
             for entry in library_list:
-                print(entry)
                 if re.search('.res', entry) is not None:
                     continue
 
                 libpath = re.findall(self.libpath_pattern, entry)
-                if libpath is None:
+                if len(libpath) <= 0:
                     libs_list.append(entry)
                 elif len(libpath) > 0:
                     path = libpath[0]
                     libpath_list.append(self.src_rel_path(makefile_path,
                                                           project_path, path))
+            print('libs_list:', libs_list)
+            print('libpath_list:', libpath_list)
             result.set_libs(libs_list)
             result.set_lib_paths(libpath_list)
 

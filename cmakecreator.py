@@ -1,7 +1,6 @@
 import builddata
 import os
 from io import IOBase
-import logging
 
 
 class CMakeCreator:
@@ -15,6 +14,7 @@ class CMakeCreator:
         file.write('.${CMAKE_MINOR_VERSION})\n')
         file.write('endif()\n')
         file.write('\n')
+        file.write('message(STATUS "${PROJECT_NAME}")\n\n')
 
     def __prepare_project(self, file, project_name):
         assert isinstance(file, IOBase)
@@ -22,13 +22,12 @@ class CMakeCreator:
 
         file.write('project(')
         file.write(project_name)
-        file.write(' VERSION 1.0 LANGUAGES CXX)\n')
+        file.write(' VERSION 1.0 LANGUAGES CXX)\n\n')
 
     def __add_flags(self, file, flags):
         assert isinstance(file, IOBase)
 
         file.write('if(MSVC)\n')
-        file.write('    message(status \"Setting MSVC flags\")\n')
         file.write('    target_compile_options(${PROJECT_NAME}\n')
         file.write('      PRIVATE\n')
         for flag in flags:
@@ -124,7 +123,6 @@ class CMakeCreator:
 
     def __add_libs(self, file, libs):
         assert isinstance(file, IOBase)
-        logging.info('libs: %s', libs.exc_info)
         file.write('target_link_libraries(${PROJECT_NAME}\n')
         for lib in libs:
             file.write('    ')
@@ -141,6 +139,22 @@ class CMakeCreator:
         file.write('set_target_properties(${PROJECT_NAME} ')
         file.write('PROPERTIES CXX_EXTENSIONS OFF)\n\n')
 
+    def __add_qt_support(self, file, list_of_qt_targets, qt_ver):
+        assert isinstance(file, IOBase)
+        assert isinstance(qt_ver, str)
+
+        file.write('set(CMAKE_PREFIX_PATH ')
+        file.write('~/Projetkty/qt-everywhere-opensource-src-4.8.7/bin)\n')
+        file.write('set(CMAKE_AUTOMOC ON)\n')
+        file.write('set(CMAKE_INCLUDE_CURRENT_DIR ON)\n')
+        file.write('find_package(Qt')
+        file.write(qt_ver)
+        file.write(' REQUIRED')
+        for target in list_of_qt_targets:
+            file.write(' ')
+            file.write(target)
+        file.write(')\n\n')
+
     def create_project(self, path, build_data):
         assert isinstance(path, str)
         assert isinstance(build_data, builddata.BuildData)
@@ -153,6 +167,7 @@ class CMakeCreator:
 
         self.__prepare_header(file)
         self.__prepare_project(file, build_data.target)
+        self.__add_qt_support(file, build_data.list_of_qt_targets, '4.8.7')
         self.__add_sources(file, build_data.list_of_sources)
         self.__add_dir_mimic(file, build_data.project_path)
         self.__add_target(file, build_data.target_type)
