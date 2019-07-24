@@ -143,13 +143,13 @@ class CMakeCreator:
         assert isinstance(file, IOBase)
         assert isinstance(qt_ver, str)
 
-        file.write('set(CMAKE_PREFIX_PATH ')
-        file.write('~/Projetkty/qt-everywhere-opensource-src-4.8.7/bin)\n')
+        if len(list_of_qt_targets) == 0:
+            return
         file.write('set(CMAKE_AUTOMOC ON)\n')
         file.write('set(CMAKE_INCLUDE_CURRENT_DIR ON)\n')
-        file.write('find_package(Qt')
+        file.write('find_package(Qt4 ')
         file.write(qt_ver)
-        file.write(' REQUIRED')
+        file.write(' REQUIRED COMPONENTS')
         for target in list_of_qt_targets:
             file.write(' ')
             file.write(target)
