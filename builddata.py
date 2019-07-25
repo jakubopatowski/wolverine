@@ -41,6 +41,7 @@ class BuildData:
 
         if 'd.lib' in lib:
             result = lib.replace('d.lib', '')
+            result = result.replace('.lib', '')
             if result in self.__valid_qt_libs:
                 self.is_there_qt = True
                 self.list_of_qt_targets.append(result)
