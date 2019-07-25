@@ -25,6 +25,7 @@ class BuildData:
         self.list_of_boost_libs = []
         self.is_there_qt = False
         self.list_of_qt_targets = []
+        self.list_of_qt_uis = []
         self.__valid_qt_libs = {'QtCore', 'QtGui', 'Qt3Support',
                                 'QtAssistant', 'QtAssistantClient',
                                 'QAxContainer', 'QAxServer', 'QtDBus',
@@ -82,6 +83,10 @@ class BuildData:
     # includes
     def set_includes(self, includes):
         self.list_of_includes = includes
+
+    # qt ui
+    def set_uis(self, uis):
+        self.list_of_qt_uis = uis
 
     # sources
     def set_sources(self, sources):

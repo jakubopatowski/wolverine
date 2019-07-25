@@ -77,16 +77,27 @@ class CMakeCreator:
         file.write(')\n')
         file.write('\n')
 
+    def __add_uis(self, file, uis):
+        assert isinstance(file, IOBase)
+
+        file.write('set(project_uis\n')
+        for ui in uis:
+            file.write('    \"')
+            file.write(ui.replace('\\', '/'))
+            file.write('\"\n')
+        file.write(')\n')
+        file.write('\n')
+
     def __add_target(self, file, target_type):
         assert isinstance(file, IOBase)
         assert isinstance(target_type, builddata.BuildData.TargetType)
 
         if target_type == builddata.BuildData.TargetType.LIBRARY:
             file.write('add_library(${PROJECT_NAME}\n')
-            file.write('    ${project_sources})\n')
         elif target_type == builddata.BuildData.TargetType.EXECUTABLE:
             file.write('add_executable(${PROJECT_NAME}\n')
-            file.write('    ${project_sources})\n')
+        file.write('    ${project_sources}\n')
+        file.write('    ${project_uis})\n')
         file.write('\n')
 
     def __add_includes(self, file, includes):
@@ -146,11 +157,14 @@ class CMakeCreator:
         if len(list_of_qt_targets) == 0:
             return
         file.write('set(CMAKE_AUTOMOC ON)\n')
+        file.write('set(CMAKE_AUTOUIC ON)\n')
         file.write('set(CMAKE_INCLUDE_CURRENT_DIR ON)\n')
         file.write('find_package(Qt4 ')
         file.write(qt_ver)
         file.write(' REQUIRED COMPONENTS')
         for target in list_of_qt_targets:
+            if target == 'QtWebKit':
+                continue
             file.write(' ')
             file.write(target)
         file.write(')\n\n')
@@ -169,6 +183,7 @@ class CMakeCreator:
         self.__prepare_project(file, build_data.target)
         self.__add_qt_support(file, build_data.list_of_qt_targets, '4.8.7')
         self.__add_sources(file, build_data.list_of_sources)
+        self.__add_uis(file, build_data.list_of_qt_uis)
         self.__add_dir_mimic(file, build_data.project_path)
         self.__add_target(file, build_data.target_type)
         self.__add_flags(file, build_data.list_of_flags)
