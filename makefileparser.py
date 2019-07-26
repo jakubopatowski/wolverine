@@ -34,17 +34,22 @@ class MakefileParser:
         full_path = os.path.relpath(full_path, project_path)
         return full_path
 
-    def __get_uis(self, project_path):
+    def __get_qt_files(self, project_path):
         assert isinstance(project_path, str)
 
         ui_files = []
+        qrc_files = []
         for root, dirs, files in os.walk(project_path):
             for file in files:
                 if file.endswith(".ui"):
                     ui_file = os.path.join(root, file)
                     print(ui_file)
                     ui_files.append(os.path.relpath(ui_file, project_path))
-        return ui_files
+                elif file.endswith(".qrc"):
+                    qrc_file = os.path.join(root, file)
+                    print(qrc_file)
+                    qrc_files.append(os.path.relpath(qrc_file, project_path))
+        return ui_files, qrc_files
 
     def parse_file(self, makefile_path, project_path):
         assert isinstance(makefile_path, str)
@@ -101,7 +106,8 @@ class MakefileParser:
         result.set_sources(list_of_sources)
 
         # qt ui files
-        result.set_uis(self.__get_uis(project_path))
+        uis, qrcs = self.__get_qt_files(project_path)
+        result.set_qt_files(uis, qrcs)
 
         # libraries
         libraries = re.findall(self.libs_pattern, makefile_data)

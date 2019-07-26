@@ -64,7 +64,6 @@ class CMakeCreator:
         assert isinstance(file, IOBase)
 
         file.write('set(CMAKE_EXPORT_COMPILE_COMMANDS ON)\n\n')
-        file.write('\n')
 
     def __add_sources(self, file, sources):
         assert isinstance(file, IOBase)
@@ -74,8 +73,7 @@ class CMakeCreator:
             file.write('    \"')
             file.write(source.replace('\\', '/'))
             file.write('\"\n')
-        file.write(')\n')
-        file.write('\n')
+        file.write(')\n\n')
 
     def __add_uis(self, file, uis):
         assert isinstance(file, IOBase)
@@ -85,8 +83,17 @@ class CMakeCreator:
             file.write('    \"')
             file.write(ui.replace('\\', '/'))
             file.write('\"\n')
-        file.write(')\n')
-        file.write('\n')
+        file.write(')\n\n')
+
+    def __add_qrcs(self, file, qrcs):
+        assert isinstance(file, IOBase)
+
+        file.write('set(project_qrcs\n')
+        for qrc in qrcs:
+            file.write('    \"')
+            file.write(qrc.replace('\\', '/'))
+            file.write('\"\n')
+        file.write(')\n\n')
 
     def __add_target(self, file, target_type):
         assert isinstance(file, IOBase)
@@ -184,6 +191,7 @@ class CMakeCreator:
         self.__add_qt_support(file, build_data.list_of_qt_targets, '4.8.7')
         self.__add_sources(file, build_data.list_of_sources)
         self.__add_uis(file, build_data.list_of_qt_uis)
+        self.__add_qrcs(file, build_data.list_of_qt_qrcs)
         self.__add_dir_mimic(file, build_data.project_path)
         self.__add_target(file, build_data.target_type)
         self.__add_flags(file, build_data.list_of_flags)

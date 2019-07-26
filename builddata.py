@@ -26,6 +26,7 @@ class BuildData:
         self.is_there_qt = False
         self.list_of_qt_targets = []
         self.list_of_qt_uis = []
+        self.list_of_qt_qrcs = []
         self.__valid_qt_libs = {'QtCore', 'QtGui', 'Qt3Support',
                                 'QtAssistant', 'QtAssistantClient',
                                 'QAxContainer', 'QAxServer', 'QtDBus',
@@ -86,8 +87,9 @@ class BuildData:
         self.list_of_includes = includes
 
     # qt ui
-    def set_uis(self, uis):
+    def set_qt_files(self, uis, qrcs):
         self.list_of_qt_uis = uis
+        self.list_of_qt_qrcs = qrcs
 
     # sources
     def set_sources(self, sources):
