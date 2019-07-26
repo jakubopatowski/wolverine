@@ -199,12 +199,13 @@ class CMakeCreator:
 
         file.close()
 
-    def create_main_project(self, path, subprojects):
+    def create_main_project(self, path, subprojects, project_name):
         assert isinstance(path, str)
+        assert isinstance(project_name, str)
 
         file = open(os.path.join(path, 'CMakeLists.txt'), 'w')
         self.__prepare_header(file)
-
+        self.__prepare_project(file, 'Syndis')
         for project in subprojects:
             project_path = os.path.join(path, project)
             if os.path.isfile(os.path.join(project_path, 'CMakeLists.txt')):

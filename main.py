@@ -1,11 +1,16 @@
 import makefileparser
 import cmakecreator
 import os
+import configparser
 
 
-src_path = os.path.join('c:\\', 'Projekty', 'trunk', 'src')
-build_path = os.path.join('c:\\', 'Projekty', 'trunk',
-                          'win32-msvc2015_d')
+config = configparser.ConfigParser()
+config.sections()
+config.read('config.ini')
+print(config.sections())
+
+src_path = os.path.join(config['paths']['src_path'])
+build_path = os.path.join(config['paths']['build_path'])
 makefile_parser = makefileparser.MakefileParser()
 
 subprojects_list = [name for name in os.listdir(build_path)
@@ -24,4 +29,4 @@ for subproject in subprojects_list:
     cmake.create_project(sub_path, build_data)
 
 main_cmake = cmakecreator.CMakeCreator()
-main_cmake.create_main_project(src_path, subprojects_list)
+main_cmake.create_main_project(src_path, subprojects_list, 'syndis')

@@ -39,7 +39,7 @@ class BuildData:
     def get_qt_target(self, lib):
         assert isinstance(lib, str)
 
-        if 'd.lib' in lib:
+        if '.lib' in lib:
             result = lib.replace('d.lib', '')
             result = result.replace('.lib', '')
             if result in self.__valid_qt_libs:
