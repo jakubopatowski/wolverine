@@ -51,6 +51,18 @@ class MakefileParser:
                     qrc_files.append(os.path.relpath(qrc_file, project_path))
         return ui_files, qrc_files
 
+    def __get_headers(self, project_path):
+        assert isinstance(project_path, str)
+
+        header_files = []
+        for root, dirs, files in os.walk(project_path):
+            for file in files:
+                if file.endswith('.h') or file.endswith('.hpp'):
+                    header_file = os.path.join(root, file)
+                    print(header_file)
+                    header_files.append(header_file)
+        return header_files
+
     def parse_file(self, makefile_path, project_path):
         assert isinstance(makefile_path, str)
         assert isinstance(project_path, str)
@@ -63,7 +75,7 @@ class MakefileParser:
         with open(makefile_path) as makefile:
             makefile_data = makefile.read()
 
-            # delete line continuations
+        # delete line continuations
         makefile_data = re.sub(self.line_continue_pattern, '',
                                makefile_data)
 
@@ -104,6 +116,10 @@ class MakefileParser:
                                                      project_path, source))
 
         result.set_sources(list_of_sources)
+
+        # headers
+        headers = self.__get_headers(project_path)
+        result.set_headers(headers)
 
         # qt ui files
         uis, qrcs = self.__get_qt_files(project_path)

@@ -74,6 +74,16 @@ class CMakeCreator:
             file.write('\"\n')
         file.write(')\n\n')
 
+    def __add_headers(self, file, headers):
+        assert isinstance(file, IOBase)
+
+        file.write('set(project_headers\n')
+        for header in headers:
+            file.write('    \"')
+            file.write(header.replace('\\', '/'))
+            file.write('\"\n')
+        file.write(')\n\n')
+
     def __add_uis(self, file, uis):
         assert isinstance(file, IOBase)
 
@@ -103,6 +113,7 @@ class CMakeCreator:
         elif target_type == builddata.BuildData.TargetType.EXECUTABLE:
             file.write('add_executable(${PROJECT_NAME}\n')
         file.write('    ${project_sources}\n')
+        file.write('    ${project_headers}\n')
         file.write('    ${project_uis}\n')
         file.write('    ${project_qrcs})\n\n')
 
@@ -189,6 +200,7 @@ class CMakeCreator:
         self.__prepare_project(file, build_data.target)
         self.__add_qt_support(file, build_data.list_of_qt_targets, '4.8.7')
         self.__add_sources(file, build_data.list_of_sources)
+        self.__add_headers(file, build_data.list_of_headers)
         self.__add_uis(file, build_data.list_of_qt_uis)
         self.__add_qrcs(file, build_data.list_of_qt_qrcs)
         self.__add_dir_mimic(file, build_data.project_path)

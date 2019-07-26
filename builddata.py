@@ -19,6 +19,7 @@ class BuildData:
         self.list_of_flags = []
         self.list_of_includes = []
         self.list_of_sources = []
+        self.list_of_headers = []
         self.list_of_libs = []
         self.list_of_lib_paths = []
         self.is_there_boost = False
@@ -94,6 +95,9 @@ class BuildData:
     # sources
     def set_sources(self, sources):
         self.list_of_sources = sources
+
+    def set_headers(self, headers):
+        self.list_of_headers = headers
 
     def set_libs(self, libs):
         print('libs: ', libs)
