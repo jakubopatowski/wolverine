@@ -12,9 +12,7 @@ class CMakeCreator:
         file.write('if(${CMAKE_VERSION} VERSION_LESS 3.12)\n')
         file.write('    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}')
         file.write('.${CMAKE_MINOR_VERSION})\n')
-        file.write('endif()\n')
-        file.write('\n')
-        file.write('message(STATUS "${PROJECT_NAME}")\n\n')
+        file.write('endif()\n\n')
 
     def __prepare_project(self, file, project_name):
         assert isinstance(file, IOBase)
@@ -22,7 +20,8 @@ class CMakeCreator:
 
         file.write('project(')
         file.write(project_name)
-        file.write(' VERSION 1.0 LANGUAGES CXX)\n\n')
+        file.write(' VERSION 1.0 LANGUAGES CXX)\n')
+        file.write('message(STATUS "${PROJECT_NAME}")\n\n')
 
     def __add_flags(self, file, flags):
         assert isinstance(file, IOBase)
@@ -104,8 +103,8 @@ class CMakeCreator:
         elif target_type == builddata.BuildData.TargetType.EXECUTABLE:
             file.write('add_executable(${PROJECT_NAME}\n')
         file.write('    ${project_sources}\n')
-        file.write('    ${project_uis})\n')
-        file.write('\n')
+        file.write('    ${project_uis}\n')
+        file.write('    ${project_qrcs})\n\n')
 
     def __add_includes(self, file, includes):
         assert isinstance(file, IOBase)
