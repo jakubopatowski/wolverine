@@ -1,6 +1,5 @@
 import unittest
 import makefileparser
-import builddata
 
 
 class TestMakefileParser(unittest.TestCase):

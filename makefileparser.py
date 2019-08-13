@@ -19,6 +19,7 @@ class MakefileParser:
     libs_pattern = 'LIBS\\s*=\\s*(.*)'
     libpath_pattern = '\\/LIBPATH:(\\S*)'
     entry_pattern = '\\S*'
+    dll_export = ['RADOSC_EXP']
 
     def __init__(self):
         self.subprojects = []
@@ -51,17 +52,37 @@ class MakefileParser:
                     qrc_files.append(os.path.relpath(qrc_file, project_path))
         return ui_files, qrc_files
 
+    def __is_public(self, file_path):
+        assert isinstance(file_path, str)
+
+        if not os.path.isfile(file_path):
+            return None
+
+        with open(file_path) as h_file:
+            h_data = h_file.read()
+
+        for item in self.dll_export:
+            if re.match(item, h_data):
+                return True
+
+        return False
+
     def __get_headers(self, project_path):
         assert isinstance(project_path, str)
+        exclude = ['.ccls-cache']
 
-        header_files = []
-        for root, dirs, files in os.walk(project_path):
+        public_headers = []
+        private_headers = []
+        for root, dirs, files in os.walk(project_path, topdown=True):
+            dirs[:] = [d for d in dirs if d not in exclude]
             for file in files:
                 if file.endswith('.h') or file.endswith('.hpp'):
                     header_file = os.path.join(root, file)
-                    print(header_file)
-                    header_files.append(header_file)
-        return header_files
+                    if self.__is_public(header_file):
+                        public_headers.append(header_file)
+                    else:
+                        private_headers.append(header_file)
+        return public_headers, private_headers
 
     def parse_file(self, makefile_path, project_path):
         assert isinstance(makefile_path, str)
@@ -118,8 +139,9 @@ class MakefileParser:
         result.set_sources(list_of_sources)
 
         # headers
-        headers = self.__get_headers(project_path)
-        result.set_headers(headers)
+        public, private = self.__get_headers(project_path)
+        result.set_public_headers(public)
+        result.set_private_headers(private)
 
         # qt ui files
         uis, qrcs = self.__get_qt_files(project_path)

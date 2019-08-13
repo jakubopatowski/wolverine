@@ -74,11 +74,18 @@ class CMakeCreator:
             file.write('\"\n')
         file.write(')\n\n')
 
-    def __add_headers(self, file, headers):
+    def __add_headers(self, file, public, private):
         assert isinstance(file, IOBase)
 
-        file.write('set(project_headers\n')
-        for header in headers:
+        file.write('set(public_headers\n')
+        for header in public:
+            file.write('    \"')
+            file.write(header.replace('\\', '/'))
+            file.write('\"\n')
+        file.write(')\n\n')
+
+        file.write('set(private_headers\n')
+        for header in private:
             file.write('    \"')
             file.write(header.replace('\\', '/'))
             file.write('\"\n')
@@ -200,7 +207,8 @@ class CMakeCreator:
         self.__prepare_project(file, build_data.target)
         self.__add_qt_support(file, build_data.list_of_qt_targets, '4.8.7')
         self.__add_sources(file, build_data.list_of_sources)
-        self.__add_headers(file, build_data.list_of_headers)
+        self.__add_headers(file, build_data.public_headers,
+                           build_data.private_headers)
         self.__add_uis(file, build_data.list_of_qt_uis)
         self.__add_qrcs(file, build_data.list_of_qt_qrcs)
         self.__add_dir_mimic(file, build_data.project_path)
