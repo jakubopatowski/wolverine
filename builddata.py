@@ -41,6 +41,9 @@ class BuildData:
     def get_qt_target(self, lib):
         assert isinstance(lib, str)
 
+        if 'QtWebKit' in lib:
+            return lib
+
         if '.lib' in lib:
             result = lib.replace('d.lib', '')
             result = result.replace('.lib', '')
