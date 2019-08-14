@@ -58,11 +58,11 @@ class MakefileParser:
         if not os.path.isfile(file_path):
             return None
 
-        with open(file_path) as h_file:
+        with open(file_path, errors='replace') as h_file:
             h_data = h_file.read()
 
         for item in self.dll_export:
-            if re.match(item, h_data):
+            if re.search(item, h_data) is not None:
                 return True
 
         return False

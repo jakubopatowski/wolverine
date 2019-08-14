@@ -120,7 +120,8 @@ class CMakeCreator:
         elif target_type == builddata.BuildData.TargetType.EXECUTABLE:
             file.write('add_executable(${PROJECT_NAME}\n')
         file.write('    ${project_sources}\n')
-        file.write('    ${project_headers}\n')
+        file.write('    ${public_headers}\n')
+        file.write('    ${private_headers}\n')
         file.write('    ${project_uis}\n')
         file.write('    ${project_qrcs})\n\n')
 
