@@ -1,5 +1,6 @@
 import makefileparser
 import cmakecreator
+import projectfixer
 import os
 import configparser
 
@@ -25,6 +26,10 @@ for subproject in subprojects_list:
     sub_path = os.path.join(src_path, subproject)
 
     build_data = makefile_parser.parse_file(makef_path, sub_path)
+    fixer = projectfixer.ProjectFixer()
+    fixer.copy_file(os.path.join(sub_path, 'include'),
+                    build_data.public_headers,
+                    sub_path)
     cmake = cmakecreator.CMakeCreator()
     cmake.create_project(sub_path, build_data)
 

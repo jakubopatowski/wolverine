@@ -67,8 +67,9 @@ class MakefileParser:
 
         return False
 
-    def __get_headers(self, project_path):
+    def __get_headers(self, project_path, makefile_path):
         assert isinstance(project_path, str)
+        assert isinstance(makefile_path, str)
         exclude = ['.ccls-cache']
 
         public_headers = []
@@ -77,11 +78,14 @@ class MakefileParser:
             dirs[:] = [d for d in dirs if d not in exclude]
             for file in files:
                 if file.endswith('.h') or file.endswith('.hpp'):
-                    header_file = os.path.join(root, file)
-                    if self.__is_public(header_file):
-                        public_headers.append(header_file)
+                    header_abs_path = os.path.join(root, file)
+                    header_rel_path = self.src_rel_path(makefile_path,
+                                                        project_path,
+                                                        header_abs_path)
+                    if self.__is_public(header_abs_path):
+                        public_headers.append(header_rel_path)
                     else:
-                        private_headers.append(header_file)
+                        private_headers.append(header_rel_path)
         return public_headers, private_headers
 
     def parse_file(self, makefile_path, project_path):
@@ -139,7 +143,7 @@ class MakefileParser:
         result.set_sources(list_of_sources)
 
         # headers
-        public, private = self.__get_headers(project_path)
+        public, private = self.__get_headers(project_path, makefile_path)
         result.set_public_headers(public)
         result.set_private_headers(private)
 

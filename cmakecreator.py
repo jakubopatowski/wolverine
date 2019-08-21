@@ -129,6 +129,8 @@ class CMakeCreator:
         assert isinstance(file, IOBase)
 
         file.write('target_include_directories(${PROJECT_NAME}\n')
+        file.write('    PUBLIC\n')
+        file.write('    include\n')
         file.write('    PRIVATE\n')
         for include in includes:
             file.write('    \"')
