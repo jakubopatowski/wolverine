@@ -12,8 +12,8 @@ class ProjectFixer:
 
         print('Copying headers: ', len(files))
         for file in files:
+            print(file)
             file_name = os.path.basename(file)
-            # file_name = file_name.replace('\\', '/')
             target_file = os.path.join(dest_dir, file_name)
             target_file = target_file.replace('\\', '/')
             source_file = os.path.join(src_dir, file)

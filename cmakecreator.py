@@ -77,15 +77,25 @@ class CMakeCreator:
     def __add_headers(self, file, public, private):
         assert isinstance(file, IOBase)
 
+        headers = set()
         file.write('set(public_headers\n')
         for header in public:
+            header_file = os.path.basename(header)
+            if header_file in headers:
+                continue
+            else:
+                headers.add(header_file)
             file.write('    \"')
-            file.write(header.replace('\\', '/'))
+            file.write(os.path.join('include', header_file))
             file.write('\"\n')
         file.write(')\n\n')
 
         file.write('set(private_headers\n')
         for header in private:
+            if os.path.basename(header) in headers:
+                continue
+            else:
+                headers.add(os.path.basename(header))
             file.write('    \"')
             file.write(header.replace('\\', '/'))
             file.write('\"\n')
@@ -125,12 +135,14 @@ class CMakeCreator:
         file.write('    ${project_uis}\n')
         file.write('    ${project_qrcs})\n\n')
 
-    def __add_includes(self, file, includes):
+    def __add_includes(self, file, includes, isPublic=False):
         assert isinstance(file, IOBase)
 
         file.write('target_include_directories(${PROJECT_NAME}\n')
-        file.write('    PUBLIC\n')
-        file.write('    include\n')
+        if isPublic:
+            file.write('    PUBLIC\n')
+            file.write('    include\n')
+
         file.write('    PRIVATE\n')
         for include in includes:
             file.write('    \"')
@@ -221,7 +233,10 @@ class CMakeCreator:
         self.__export_commands(file)
         self.__add_ccache(file)
         self.__add_target_features(file)
-        self.__add_includes(file, build_data.list_of_includes)
+        isPublic = False
+        if len(build_data.public_headers) > 0:
+            isPublic = True
+        self.__add_includes(file, build_data.list_of_includes, isPublic)
         if build_data.list_of_lib_paths:
             self.__add_link_dirs(file, build_data.list_of_lib_paths)
         if build_data.list_of_libs:

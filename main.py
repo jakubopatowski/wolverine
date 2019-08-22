@@ -24,12 +24,17 @@ for subproject in subprojects_list:
     print('transforming: ', subproject)
     makef_path = os.path.join(build_path, subproject, 'qt4', 'makefile')
     sub_path = os.path.join(src_path, subproject)
+    if os.path.isdir(sub_path) is False:
+        print("Projekt nie istnieje!")
+        continue
 
     build_data = makefile_parser.parse_file(makef_path, sub_path)
     fixer = projectfixer.ProjectFixer()
-    fixer.copy_file(os.path.join(sub_path, 'include'),
-                    build_data.public_headers,
-                    sub_path)
+    if len(build_data.public_headers) > 0:
+        fixer.copy_file(os.path.join(sub_path, 'include'),
+                        build_data.public_headers,
+                        sub_path)
+
     cmake = cmakecreator.CMakeCreator()
     cmake.create_project(sub_path, build_data)
 
