@@ -86,7 +86,8 @@ class CMakeCreator:
             else:
                 headers.add(header_file)
             file.write('    \"')
-            file.write(os.path.join('include', header_file))
+            public = os.path.join('include', header_file)
+            file.write(public.replace('\\', '/'))
             file.write('\"\n')
         file.write(')\n\n')
 
@@ -208,6 +209,29 @@ class CMakeCreator:
             file.write(target)
         file.write(')\n\n')
 
+    def __add_install(self, file):
+        assert isinstance(file, IOBase)
+
+        file.write('install (TARGETS\n')
+        file.write('         ${PROJECT_NAME}\n')
+        file.write('         EXPORT ${PROJECT_NAME}Config\n')
+        file.write('         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}\n')
+        file.write('         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}\n')
+        file.write('         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}\n')
+        file.write(')\n\n')
+        file.write('export (TARGETS\n')
+        file.write('        ${PROJECT_NAME}\n')
+        file.write('        NAMESPACE ${PROJECT_NAME}::\n')
+        file.write('        FILE "${CMAKE_CURRENT_BINARY_DIR}')
+        file.write('            /${PROJECT_NAME}Config.cmake"\n')
+        file.write(')\n\n')
+        file.write('install (EXPORT\n')
+        file.write('         ${PROJECT_NAME}Config\n')
+        file.write('         DESTINATION "${CMAKE_INSTALL_DATADIR}')
+        file.write('             /${PROJECT_NAME}/cmake"\n')
+        file.write('         NAMESPACE ${PROJECT_NAME}::\n')
+        file.write(')\n\n')
+
     def create_project(self, path, build_data):
         assert isinstance(path, str)
         assert isinstance(build_data, builddata.BuildData)
@@ -241,7 +265,8 @@ class CMakeCreator:
             self.__add_link_dirs(file, build_data.list_of_lib_paths)
         if build_data.list_of_libs:
             self.__add_libs(file, build_data.list_of_libs)
-
+        if build_data.target_type == builddata.BuildData.TargetType.LIBRARY:
+            self.__add_install(file)
         file.close()
 
     def create_main_project(self, path, subprojects, project_name):

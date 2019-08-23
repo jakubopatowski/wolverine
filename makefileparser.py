@@ -19,7 +19,11 @@ class MakefileParser:
     libs_pattern = 'LIBS\\s*=\\s*(.*)'
     libpath_pattern = '\\/LIBPATH:(\\S*)'
     entry_pattern = '\\S*'
-    dll_export = ['RADOSC_EXP']
+    dll_export = ['RADOSC_EXP', 'RTOOLKIT_EXPORT', 'ZKOD_EXP',
+                  'RVVNETCLIENT_EXP', 'RV_VNET_EXPORT', 'SID_EXP',
+                  'AVRCLASSES_EXPORT', 'RVL_BACKUP_EXPORT', 'RCHART_EXPORT',
+                  'RCLASSES_EXPORT', 'RVL_COMTRADE_EXPORT', 'DECLDIR',
+                  '//install', 'RVL_CURL_EXPORT']
 
     def __init__(self):
         self.subprojects = []
