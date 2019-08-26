@@ -107,10 +107,8 @@ class BuildData:
         self.public_headers = headers
 
     def set_libs(self, libs):
-        print('libs: ', libs)
         for item in libs:
             lib = self.get_qt_target(item)
-            print(lib)
             self.list_of_libs.append(lib)
 
     def set_lib_paths(self, lib_paths):

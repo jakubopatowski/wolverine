@@ -10,7 +10,6 @@ class ProjectFixer:
             print('Destination does not exists: ', dest_dir)
             os.mkdir(dest_dir)
 
-        print('Copying headers: ', len(files))
         for file in files:
             print(file)
             file_name = os.path.basename(file)
@@ -23,5 +22,4 @@ class ProjectFixer:
                 os.remove(target_file)
 
             if os.path.isfile(source_file) is True:
-                print('coping ', source_file, ' to ', target_file)
                 copyfile(source_file, target_file)

@@ -24,22 +24,29 @@ class MakefileParser:
                   'AVRCLASSES_EXPORT', 'RVL_BACKUP_EXPORT', 'RCHART_EXPORT',
                   'RCLASSES_EXPORT', 'RVL_COMTRADE_EXPORT', 'DECLDIR',
                   '//install', 'RVL_CURL_EXPORT']
+    exclude = ['.ccls-cache']
+    export_macro = r'#define ([A-Z0-9_]*) __declspec\s*\(\s*dllexport\s*\)'
 
     def __init__(self):
         self.subprojects = []
 
-    def src_rel_path(self, makefile_path, project_path, path):
-        assert isinstance(makefile_path, str)
-        assert isinstance(project_path, str)
-        assert isinstance(path, str)
+    def change_rel_path(self, old_path, new_path, rel_file_path):
+        """Return changed relative path of a rel_file_path from old_path
+        to new_path"""
+        assert isinstance(old_path, str)
+        assert isinstance(new_path, str)
+        assert isinstance(rel_file_path, str)
 
-        makefile_dir = os.path.dirname(makefile_path)
-        full_path = os.path.normpath(os.path.join(makefile_dir,
-                                                  path))
-        full_path = os.path.relpath(full_path, project_path)
+        old_dir = os.path.dirname(old_path)
+        full_path = os.path.normpath(os.path.join(old_dir,
+                                                  rel_file_path))
+        full_path = os.path.relpath(full_path, new_path)
         return full_path
 
     def __get_qt_files(self, project_path):
+        """Return list of all ui nad qrc files in a given project_path
+        (including subdirs). List will have files with relative paths
+        according to project_path."""
         assert isinstance(project_path, str)
 
         ui_files = []
@@ -48,13 +55,28 @@ class MakefileParser:
             for file in files:
                 if file.endswith(".ui"):
                     ui_file = os.path.join(root, file)
-                    print(ui_file)
                     ui_files.append(os.path.relpath(ui_file, project_path))
                 elif file.endswith(".qrc"):
                     qrc_file = os.path.join(root, file)
-                    print(qrc_file)
                     qrc_files.append(os.path.relpath(qrc_file, project_path))
         return ui_files, qrc_files
+
+    def __get_export_macro(self, project_path):
+        assert isinstance(project_path, str)
+        print('Looking for export macro in ', project_path)
+
+        for root, dirs, files in os.walk(project_path, topdown=True):
+            dirs[:] = [d for d in dirs if d not in self.exclude]
+
+        for file in files:
+            if file.endswith('.hpp') or file.endswith('.h'):
+                print(file)
+                with open(file, errors='replace') as h_file:
+                    h_data = h_file.read()
+                match = re.search(self.export_macro, h_data)
+                print(match)
+                return match[1]
+        return None
 
     def __is_public(self, file_path):
         assert isinstance(file_path, str)
@@ -74,18 +96,17 @@ class MakefileParser:
     def __get_headers(self, project_path, makefile_path):
         assert isinstance(project_path, str)
         assert isinstance(makefile_path, str)
-        exclude = ['.ccls-cache']
 
         public_headers = []
         private_headers = []
         for root, dirs, files in os.walk(project_path, topdown=True):
-            dirs[:] = [d for d in dirs if d not in exclude]
+            dirs[:] = [d for d in dirs if d not in self.exclude]
             for file in files:
                 if file.endswith('.h') or file.endswith('.hpp'):
                     header_abs_path = os.path.join(root, file)
-                    header_rel_path = self.src_rel_path(makefile_path,
-                                                        project_path,
-                                                        header_abs_path)
+                    header_rel_path = self.change_rel_path(makefile_path,
+                                                           project_path,
+                                                           header_abs_path)
                     if self.__is_public(header_abs_path):
                         public_headers.append(header_rel_path)
                     else:
@@ -95,6 +116,9 @@ class MakefileParser:
     def parse_file(self, makefile_path, project_path):
         assert isinstance(makefile_path, str)
         assert isinstance(project_path, str)
+
+        macro = self.__get_export_macro(project_path)
+        print('Export macro: ', macro)
 
         self.subprojects.append(project_path)
 
@@ -132,8 +156,8 @@ class MakefileParser:
         list_of_includes = re.findall(self.include_pattern, includes[0])
         includes = []
         for include in list_of_includes:
-            includes.append(self.src_rel_path(makefile_path, project_path,
-                                              include))
+            includes.append(self.change_rel_path(makefile_path, project_path,
+                                                 include))
 
         result.set_includes(includes)
 
@@ -141,8 +165,8 @@ class MakefileParser:
         sources = re.findall(self.sources_pattern, makefile_data)
         list_of_sources = []
         for source in sources[0].split():
-            list_of_sources.append(self.src_rel_path(makefile_path,
-                                                     project_path, source))
+            list_of_sources.append(self.change_rel_path(makefile_path,
+                                                        project_path, source))
 
         result.set_sources(list_of_sources)
 
@@ -158,14 +182,14 @@ class MakefileParser:
         # libraries
         libraries = re.findall(self.libs_pattern, makefile_data)
 
-        print('libraries:', libraries)
+        # print('libraries:', libraries)
         if not libraries:
             print("There are no libraries!")
         else:
             library_list = libraries[0].split()
             libpath_list = []
             libs_list = []
-            print('library_list:', library_list)
+            # print('library_list:', library_list)
             for entry in library_list:
                 if re.search('.res', entry) is not None:
                     continue
@@ -175,10 +199,11 @@ class MakefileParser:
                     libs_list.append(entry)
                 elif len(libpath) > 0:
                     path = libpath[0]
-                    libpath_list.append(self.src_rel_path(makefile_path,
-                                                          project_path, path))
-            print('libs_list:', libs_list)
-            print('libpath_list:', libpath_list)
+                    libpath_list.append(self.change_rel_path(makefile_path,
+                                                             project_path,
+                                                             path))
+            # print('libs_list:', libs_list)
+            # print('libpath_list:', libpath_list)
             result.set_libs(libs_list)
             result.set_lib_paths(libpath_list)
 
