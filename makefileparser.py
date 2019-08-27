@@ -1,6 +1,7 @@
 import re
 import os
 import builddata
+import tools
 
 
 class MakefileParser:
@@ -30,19 +31,6 @@ class MakefileParser:
     def __init__(self):
         self.subprojects = []
 
-    def change_rel_path(self, old_path, new_path, rel_file_path):
-        """Return changed relative path of a rel_file_path from old_path
-        to new_path"""
-        assert isinstance(old_path, str)
-        assert isinstance(new_path, str)
-        assert isinstance(rel_file_path, str)
-
-        old_dir = os.path.dirname(old_path)
-        full_path = os.path.normpath(os.path.join(old_dir,
-                                                  rel_file_path))
-        full_path = os.path.relpath(full_path, new_path)
-        return full_path
-
     def __get_qt_files(self, project_path):
         """Return list of all ui nad qrc files in a given project_path
         (including subdirs). List will have files with relative paths
@@ -67,15 +55,16 @@ class MakefileParser:
 
         for root, dirs, files in os.walk(project_path, topdown=True):
             dirs[:] = [d for d in dirs if d not in self.exclude]
-
+        print(files)
         for file in files:
             if file.endswith('.hpp') or file.endswith('.h'):
                 print(file)
                 with open(file, errors='replace') as h_file:
                     h_data = h_file.read()
                 match = re.search(self.export_macro, h_data)
-                print(match)
-                return match[1]
+                if match is not None:
+                    print(match)
+                    return match[1]
         return None
 
     def __is_public(self, file_path):
@@ -104,9 +93,9 @@ class MakefileParser:
             for file in files:
                 if file.endswith('.h') or file.endswith('.hpp'):
                     header_abs_path = os.path.join(root, file)
-                    header_rel_path = self.change_rel_path(makefile_path,
-                                                           project_path,
-                                                           header_abs_path)
+                    header_rel_path = tools.change_rel_path(makefile_path,
+                                                            project_path,
+                                                            header_abs_path)
                     if self.__is_public(header_abs_path):
                         public_headers.append(header_rel_path)
                     else:
@@ -116,9 +105,6 @@ class MakefileParser:
     def parse_file(self, makefile_path, project_path):
         assert isinstance(makefile_path, str)
         assert isinstance(project_path, str)
-
-        macro = self.__get_export_macro(project_path)
-        print('Export macro: ', macro)
 
         self.subprojects.append(project_path)
 
@@ -156,8 +142,8 @@ class MakefileParser:
         list_of_includes = re.findall(self.include_pattern, includes[0])
         includes = []
         for include in list_of_includes:
-            includes.append(self.change_rel_path(makefile_path, project_path,
-                                                 include))
+            includes.append(tools.change_rel_path(makefile_path, project_path,
+                                                  include))
 
         result.set_includes(includes)
 
@@ -165,8 +151,8 @@ class MakefileParser:
         sources = re.findall(self.sources_pattern, makefile_data)
         list_of_sources = []
         for source in sources[0].split():
-            list_of_sources.append(self.change_rel_path(makefile_path,
-                                                        project_path, source))
+            list_of_sources.append(tools.change_rel_path(makefile_path,
+                                                         project_path, source))
 
         result.set_sources(list_of_sources)
 
@@ -199,9 +185,9 @@ class MakefileParser:
                     libs_list.append(entry)
                 elif len(libpath) > 0:
                     path = libpath[0]
-                    libpath_list.append(self.change_rel_path(makefile_path,
-                                                             project_path,
-                                                             path))
+                    libpath_list.append(tools.change_rel_path(makefile_path,
+                                                              project_path,
+                                                              path))
             # print('libs_list:', libs_list)
             # print('libpath_list:', libpath_list)
             result.set_libs(libs_list)
