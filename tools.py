@@ -18,7 +18,7 @@ def change_rel_path(old_path, new_path, rel_file_path):
     return full_path
 
 
-def get_files(directory, pattern=None, exclude=None, with_subdirs=False):
+def get_files(directory, pattern=None, exclude=None, relative_path=False):
     """
     Return list of files in a given directory that meet up given
     regex pattern. By default it does not include files in subdirectories.
@@ -38,5 +38,9 @@ def get_files(directory, pattern=None, exclude=None, with_subdirs=False):
                 match = pattern.match(file)
                 if match is None:
                     continue
-            result.append(os.path.join(root, file))
+            abs_path = os.path.join(root, file)
+            if relative_path:
+                result.append(os.path.relpath(abs_path, directory))
+            else:
+                result.append(abs_path)
     return result

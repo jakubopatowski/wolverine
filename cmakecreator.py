@@ -142,7 +142,9 @@ class CMakeCreator:
         file.write('target_include_directories(${PROJECT_NAME}\n')
         if isPublic:
             file.write('    PUBLIC\n')
-            file.write('    include\n')
+            file.write('    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}')
+            file.write('/include>\n')
+            file.write('    $<INSTALL_INTERFACE:include>')
 
         file.write('    PRIVATE\n')
         for include in includes:
@@ -223,12 +225,12 @@ class CMakeCreator:
         file.write('        ${PROJECT_NAME}\n')
         file.write('        NAMESPACE ${PROJECT_NAME}::\n')
         file.write('        FILE "${CMAKE_CURRENT_BINARY_DIR}')
-        file.write('            /${PROJECT_NAME}Config.cmake"\n')
+        file.write('/${PROJECT_NAME}Config.cmake"\n')
         file.write(')\n\n')
         file.write('install (EXPORT\n')
         file.write('         ${PROJECT_NAME}Config\n')
         file.write('         DESTINATION "${CMAKE_INSTALL_DATADIR}')
-        file.write('             /${PROJECT_NAME}/cmake"\n')
+        file.write('/${PROJECT_NAME}/cmake"\n')
         file.write('         NAMESPACE ${PROJECT_NAME}::\n')
         file.write(')\n\n')
 

@@ -30,8 +30,10 @@ class TestTools(unittest.TestCase):
         files = tools.get_files(
             'c:/Projekty/trunk/src/radosc',
             re.compile(r'\w*.(h|hpp)$'),
-            exclude)
-        print(files)
+            exclude,
+            True)
+        for item in files:
+            print(item)
 
 
 if __name__ == '__main__':
