@@ -7,7 +7,6 @@ import tools
 class MakefileParser:
 
     line_continue_pattern = r'\\\n'
-    # co robi r ?
     target_pattern = 'TARGET\\s*=\\s*(\\w*)'
     defines_pattern = 'DEFINES\\s*=\\s*(.*)'
     define_pattern = '-D(\\S*)'
@@ -20,13 +19,9 @@ class MakefileParser:
     libs_pattern = 'LIBS\\s*=\\s*(.*)'
     libpath_pattern = '\\/LIBPATH:(\\S*)'
     entry_pattern = '\\S*'
-    dll_export = ['RADOSC_EXP', 'RTOOLKIT_EXPORT', 'ZKOD_EXP',
-                  'RVVNETCLIENT_EXP', 'RV_VNET_EXPORT', 'SID_EXP',
-                  'AVRCLASSES_EXPORT', 'RVL_BACKUP_EXPORT', 'RCHART_EXPORT',
-                  'RCLASSES_EXPORT', 'RVL_COMTRADE_EXPORT', 'DECLDIR',
-                  '//install', 'RVL_CURL_EXPORT']
     exclude = ['.ccls-cache', 'include']
     export_macro = r'#define ([A-Z0-9_]*) __declspec\s*\(\s*dllexport\s*\)'
+
     header_pat = re.compile(r'\w*.(h|hpp)$')
     ui_pat = re.compile(r'\w*.(ui)$')
     qrc_pat = re.compile(r'\w*.(qrc)$')
@@ -57,8 +52,9 @@ class MakefileParser:
                 return match[1]
         return None
 
-    def __is_public(self, file_path):
+    def __is_public(self, file_path, export_macro):
         assert isinstance(file_path, str)
+        assert isinstance(export_macro, str)
 
         if not os.path.isfile(file_path):
             return None
@@ -66,13 +62,13 @@ class MakefileParser:
         with open(file_path, errors='replace') as h_file:
             h_data = h_file.read()
 
-        for item in self.dll_export:
-            if re.search(item, h_data) is not None:
-                return True
+        pattern = re.compile(export_macro)
+        if re.search(pattern, h_data) is not None:
+            return True
 
         return False
 
-    def __get_headers(self, project_path, makefile_path):
+    def __get_headers(self, project_path, makefile_path, export_macro):
         assert isinstance(project_path, str)
         assert isinstance(makefile_path, str)
 
@@ -85,11 +81,12 @@ class MakefileParser:
             header_rel_path = tools.change_rel_path(makefile_path,
                                                     project_path,
                                                     header_abs_path)
-
-            if self.__is_public(header_abs_path):
+            if export_macro is not None and self.__is_public(
+                    header_abs_path, export_macro):
                 public_headers.append(header_rel_path)
             else:
                 private_headers.append(header_rel_path)
+
         return public_headers, private_headers
 
     def parse_file(self, makefile_path, project_path):
@@ -103,9 +100,6 @@ class MakefileParser:
         if not os.path.isfile(makefile_path):
             return None
 
-        macro = self.__get_export_macro(project_path)
-        print(macro)
-
         with open(makefile_path) as makefile:
             makefile_data = makefile.read()
 
@@ -115,6 +109,11 @@ class MakefileParser:
 
         result = builddata.BuildData()
         result.set_project_path(project_path)
+
+        # export macro
+        macro = self.__get_export_macro(project_path)
+        if macro is not None:
+            result.set_export_macro
 
         # targets
         targets = re.findall(self.target_pattern, makefile_data)
@@ -152,7 +151,8 @@ class MakefileParser:
         result.set_sources(list_of_sources)
 
         # headers
-        public, private = self.__get_headers(project_path, makefile_path)
+        public, private = self.__get_headers(project_path, makefile_path,
+                                             macro)
         result.set_public_headers(public)
         result.set_private_headers(private)
 

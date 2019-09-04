@@ -1,4 +1,4 @@
-from enum import Enum
+from targettype import TargetType
 
 
 class BuildData:
@@ -6,7 +6,7 @@ class BuildData:
     @brief      Placeholder for makefile parsed data
 
     @details    This class holds data about c++ project that are needed
-    to build process.
+    in build process of that project.
     """
 
     def __init__(self):
@@ -15,6 +15,8 @@ class BuildData:
         self.project_path = None
         self.target = None
         self.target_type = None
+        self.export_macro = None
+        self.target_deps = []
         self.list_of_defines = []
         self.list_of_flags = []
         self.list_of_includes = []
@@ -67,17 +69,11 @@ class BuildData:
     def set_target_name(self, target):
         self.target = target
 
-    # target type
-    class TargetType(Enum):
-        EXECUTABLE = 1
-        LIBRARY = 2
-        HEADER_LIBRARY = 3
-
     def set_target_type(self, target_type):
         if target_type == 'app':
-            self.target_type = self.TargetType.EXECUTABLE
+            self.target_type = TargetType.EXECUTABLE
         elif target_type == 'lib':
-            self.target_type = self.TargetType.LIBRARY
+            self.target_type = TargetType.LIBRARY
 
     # defines
     def set_defines(self, defines):
@@ -111,5 +107,12 @@ class BuildData:
             lib = self.get_qt_target(item)
             self.list_of_libs.append(lib)
 
+    def reevaluate_deps(self, projects):
+        # ToDo
+        return None
+
     def set_lib_paths(self, lib_paths):
         self.list_of_lib_paths = lib_paths
+
+    def set_export_macro(self, export_macro):
+        self.export_macro = export_macro

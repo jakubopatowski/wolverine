@@ -1,5 +1,6 @@
 import builddata
 import os
+from targettype import TargetType
 from io import IOBase
 
 
@@ -124,11 +125,11 @@ class CMakeCreator:
 
     def __add_target(self, file, target_type):
         assert isinstance(file, IOBase)
-        assert isinstance(target_type, builddata.BuildData.TargetType)
+        assert isinstance(target_type, TargetType)
 
-        if target_type == builddata.BuildData.TargetType.LIBRARY:
+        if target_type == TargetType.LIBRARY:
             file.write('add_library(${PROJECT_NAME}\n')
-        elif target_type == builddata.BuildData.TargetType.EXECUTABLE:
+        elif target_type == TargetType.EXECUTABLE:
             file.write('add_executable(${PROJECT_NAME}\n')
         file.write('    ${project_sources}\n')
         file.write('    ${public_headers}\n')
@@ -267,7 +268,7 @@ class CMakeCreator:
             self.__add_link_dirs(file, build_data.list_of_lib_paths)
         if build_data.list_of_libs:
             self.__add_libs(file, build_data.list_of_libs)
-        if build_data.target_type == builddata.BuildData.TargetType.LIBRARY:
+        if build_data.target_type == TargetType.LIBRARY:
             self.__add_install(file)
         file.close()
 
