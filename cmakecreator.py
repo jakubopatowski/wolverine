@@ -20,7 +20,7 @@ class CMakeCreator:
 
         file.write('project(')
         file.write(project_name)
-        file.write(' VERSION 1.0 LANGUAGES CXX)\n')
+        file.write(' VERSION 1.0 LANGUAGES C CXX)\n')
         file.write('message(STATUS "${PROJECT_NAME}")\n\n')
 
     def __add_flags(self, file, flags):
