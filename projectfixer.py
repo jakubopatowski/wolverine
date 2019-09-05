@@ -9,7 +9,7 @@ class ProjectFixer:
         shutil.rmtree(dest_dir, ignore_errors=True)
 
         if os.path.isdir(dest_dir) is False:
-            print('Destination does not exists: ', dest_dir)
+            # print('Destination does not exists: ', dest_dir)
             os.mkdir(dest_dir)
 
         for file in files:
@@ -20,13 +20,13 @@ class ProjectFixer:
             source_file = source_file.replace('\\', '/')
 
             if os.path.isfile(target_file) is True:
-                print('Docelowy plik istnieje, usuwam: %s', target_file)
+                # print('Docelowy plik istnieje, usuwam: %s', target_file)
                 os.remove(target_file)
 
             if os.path.isfile(source_file) is True:
                 try:
-                    print('Kopiowanie pliku: %s do %s', source_file,
-                          target_file)
+                    # print('Kopiowanie pliku: %s do %s', source_file,
+                    #      target_file)
                     shutil.copy(source_file, target_file)
                 except IOError as e:
                     print('Unable to copy file, %s', e)

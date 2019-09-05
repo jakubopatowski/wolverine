@@ -41,7 +41,6 @@ class MakefileParser:
 
     def __get_export_macro(self, project_path):
         assert isinstance(project_path, str)
-        print('Looking for export macro in ', project_path)
 
         files = tools.get_files(project_path, self.header_pat)
         for file in files:
@@ -51,6 +50,20 @@ class MakefileParser:
             if match is not None:
                 return match[1]
         return None
+
+    def __file_starts(self, file_path, pattern):
+        assert isinstance(file_path, str)
+        assert isinstance(pattern, str)
+
+        if not os.path.isfile(file_path):
+            return None
+
+        with open(file_path, errors='replace') as f:
+            first_line = f.readline()
+
+        if first_line.startswith(pattern):
+            return True
+        return False
 
     def __is_public(self, file_path, export_macro):
         assert isinstance(file_path, str)
@@ -74,6 +87,7 @@ class MakefileParser:
 
         public_headers = []
         private_headers = []
+        interface_headers = []
 
         files = tools.get_files(project_path, self.header_pat, self.exclude)
         for file in files:
@@ -84,10 +98,13 @@ class MakefileParser:
             if export_macro is not None and self.__is_public(
                     header_abs_path, export_macro):
                 public_headers.append(header_rel_path)
+            elif self.__file_starts(
+                    header_abs_path, '//install'):
+                interface_headers.append(header_rel_path)
             else:
                 private_headers.append(header_rel_path)
 
-        return public_headers, private_headers
+        return public_headers, private_headers, interface_headers
 
     def parse_file(self, makefile_path, project_path):
         assert isinstance(makefile_path, str)
@@ -114,6 +131,7 @@ class MakefileParser:
         macro = self.__get_export_macro(project_path)
         if macro is not None:
             result.set_export_macro
+            print(macro)
 
         # targets
         targets = re.findall(self.target_pattern, makefile_data)
@@ -151,10 +169,13 @@ class MakefileParser:
         result.set_sources(list_of_sources)
 
         # headers
-        public, private = self.__get_headers(project_path, makefile_path,
-                                             macro)
+        public, private, interface = self.__get_headers(
+            project_path, makefile_path, macro)
         result.set_public_headers(public)
         result.set_private_headers(private)
+        result.set_interface_headers(interface)
+        if len(interface) > 0:
+            print(interface)
 
         # qt ui files
         uis, qrcs = self.__get_qt_files(project_path)

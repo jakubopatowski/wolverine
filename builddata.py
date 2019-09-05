@@ -23,6 +23,7 @@ class BuildData:
         self.list_of_sources = []
         self.public_headers = []
         self.private_headers = []
+        self.interface_headers = []
         self.list_of_libs = []
         self.list_of_lib_paths = []
         self.is_there_boost = False
@@ -102,13 +103,15 @@ class BuildData:
     def set_public_headers(self, headers):
         self.public_headers = headers
 
+    def set_interface_headers(self, headers):
+        self.interface_headers = headers
+
     def set_libs(self, libs):
         for item in libs:
             lib = self.get_qt_target(item)
             self.list_of_libs.append(lib)
 
     def reevaluate_deps(self, projects):
-        # ToDo
         return None
 
     def set_lib_paths(self, lib_paths):

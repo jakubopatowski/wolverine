@@ -18,7 +18,7 @@ makefile_parser = makefileparser.MakefileParser()
 subprojects_list = [name for name in os.listdir(build_path)
                     if os.path.isfile(os.path.join(build_path, name, 'qt4',
                                                    'makefile'))]
-# subprojects_list = ['bazatelem']
+# subprojects_list = ['radosc']
 
 projects = dict()
 for subproject in subprojects_list:

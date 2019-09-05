@@ -75,7 +75,7 @@ class CMakeCreator:
             file.write('\"\n')
         file.write(')\n\n')
 
-    def __add_headers(self, file, public, private):
+    def __add_headers(self, file, public, private, interface):
         assert isinstance(file, IOBase)
 
         headers = set()
@@ -94,6 +94,17 @@ class CMakeCreator:
 
         file.write('set(private_headers\n')
         for header in private:
+            if os.path.basename(header) in headers:
+                continue
+            else:
+                headers.add(os.path.basename(header))
+            file.write('    \"')
+            file.write(header.replace('\\', '/'))
+            file.write('\"\n')
+        file.write(')\n\n')
+
+        file.write('set(interface_headers\n')
+        for header in interface:
             if os.path.basename(header) in headers:
                 continue
             else:
@@ -128,14 +139,23 @@ class CMakeCreator:
         assert isinstance(target_type, TargetType)
 
         if target_type == TargetType.LIBRARY:
-            file.write('add_library(${PROJECT_NAME}\n')
+            file.write('add_library(${PROJECT_NAME} "")\n\n')
         elif target_type == TargetType.EXECUTABLE:
-            file.write('add_executable(${PROJECT_NAME}\n')
-        file.write('    ${project_sources}\n')
-        file.write('    ${public_headers}\n')
+            file.write('add_executable(${PROJECT_NAME} "")\n\n')
+
+    def __add_target_sources(self, file):
+        assert isinstance(file, IOBase)
+
+        file.write('target_sources(${PROJECT_NAME}\n')
+        file.write('  INTERFACE\n')
+        file.write('    "$<BUILD_INTERFACE:${interface_headers}>"\n')
+        file.write('  PRIVATE\n')
         file.write('    ${private_headers}\n')
         file.write('    ${project_uis}\n')
-        file.write('    ${project_qrcs})\n\n')
+        file.write('    ${project_qrcs}\n')
+        file.write('  PUBLIC\n')
+        file.write('    "$<BUILD_INTERFACE:${project_sources}>"\n')
+        file.write('    "$<BUILD_INTERFACE:${public_headers}>")\n\n')
 
     def __add_includes(self, file, includes, isPublic=False):
         assert isinstance(file, IOBase)
@@ -250,11 +270,13 @@ class CMakeCreator:
         self.__add_qt_support(file, build_data.list_of_qt_targets, '4.8.7')
         self.__add_sources(file, build_data.list_of_sources)
         self.__add_headers(file, build_data.public_headers,
-                           build_data.private_headers)
+                           build_data.private_headers,
+                           build_data.interface_headers)
         self.__add_uis(file, build_data.list_of_qt_uis)
         self.__add_qrcs(file, build_data.list_of_qt_qrcs)
         self.__add_dir_mimic(file, build_data.project_path)
         self.__add_target(file, build_data.target_type)
+        self.__add_target_sources(file)
         self.__add_flags(file, build_data.list_of_flags)
         self.__add_defines(file, build_data.list_of_defines)
         self.__export_commands(file)
