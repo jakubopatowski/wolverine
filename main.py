@@ -34,10 +34,10 @@ for subproject in subprojects_list:
     projects[build_data.target] = projectdata.ProjectData(
         build_data.target, sub_path, build_data.target_type)
     fixer = projectfixer.ProjectFixer()
+    include_dir = os.path.join(sub_path, 'include')
     if len(build_data.public_headers) > 0:
-        fixer.copy_file(os.path.join(sub_path, 'include'),
-                        build_data.public_headers,
-                        sub_path)
+        fixer.copy_file(include_dir, build_data.public_headers, sub_path)
+    fixer.create_file(include_dir, '.ignore')
 
     cmake = cmakecreator.CMakeCreator()
     cmake.create_project(sub_path, build_data)

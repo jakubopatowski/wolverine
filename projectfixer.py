@@ -3,6 +3,22 @@ import shutil
 
 
 class ProjectFixer:
+    def create_file(self, dest_dir, file_name):
+        assert isinstance(dest_dir, str)
+        assert isinstance(file_name, str)
+
+        if os.path.isdir(dest_dir) is False:
+            os.mkdir(dest_dir)
+
+        print("creating: ", os.path.join(dest_dir, file_name))
+        file = open(os.path.join(dest_dir, file_name), 'w')
+        file.write('created by makefile to cmake')
+        file.close()
+        if os.path.isfile(os.path.join(dest_dir, file_name)):
+            print('Plik utworzony.')
+        else:
+            print('Nie udało się utworzyć pliku.')
+
     def copy_file(self, dest_dir, files, src_dir):
         assert isinstance(dest_dir, str)
 

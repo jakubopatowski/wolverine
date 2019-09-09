@@ -162,12 +162,12 @@ class CMakeCreator:
 
         file.write('target_include_directories(${PROJECT_NAME}\n')
         if isPublic:
-            file.write('    PUBLIC\n')
-            file.write('    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}')
-            file.write('/include>\n')
-            file.write('    $<INSTALL_INTERFACE:include>')
+            file.write('  PUBLIC\n')
+            file.write('    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}')
+            file.write('/include>"\n')
+            file.write('    "$<INSTALL_INTERFACE:include>"\n')
 
-        file.write('    PRIVATE\n')
+        file.write('  PRIVATE\n')
         for include in includes:
             file.write('    \"')
             file.write(include.replace('\\', '/'))
@@ -198,6 +198,7 @@ class CMakeCreator:
     def __add_libs(self, file, libs):
         assert isinstance(file, IOBase)
         file.write('target_link_libraries(${PROJECT_NAME}\n')
+        file.write('  PRIVATE\n')
         for lib in libs:
             file.write('    ')
             file.write(lib)
