@@ -112,7 +112,12 @@ class BuildData:
             self.list_of_libs.append(lib)
 
     def reevaluate_deps(self, projects):
-        return None
+        tmp_list = self.list_of_libs
+        for lib in tmp_list:
+            result = lib.replace('.lib', '')
+            if result in projects:
+                id = self.list_of_libs.index(lib)
+                self.list_of_libs[id] = result
 
     def set_lib_paths(self, lib_paths):
         self.list_of_lib_paths = lib_paths

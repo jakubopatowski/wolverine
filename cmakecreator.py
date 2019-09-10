@@ -71,7 +71,8 @@ class CMakeCreator:
         file.write('set(project_sources\n')
         for source in sources:
             file.write('    \"')
-            file.write(source.replace('\\', '/'))
+            source_path = os.path.join('${PROJECT_SOURCE_DIR}', source)
+            file.write(source_path.replace('\\', '/'))
             file.write('\"\n')
         file.write(')\n\n')
 
@@ -87,13 +88,15 @@ class CMakeCreator:
             else:
                 headers.add(header_file)
             file.write('    \"')
-            public = os.path.join('include', header_file)
+            public = os.path.join('${PROJECT_SOURCE_DIR}/include', header_file)
             file.write(public.replace('\\', '/'))
             file.write('\"\n')
         file.write(')\n\n')
 
         file.write('set(private_headers\n')
         for header in private:
+            if header == '../include':
+                continue
             if os.path.basename(header) in headers:
                 continue
             else:
@@ -105,12 +108,14 @@ class CMakeCreator:
 
         file.write('set(interface_headers\n')
         for header in interface:
+            header_file = os.path.basename(header)
             if os.path.basename(header) in headers:
                 continue
             else:
                 headers.add(os.path.basename(header))
             file.write('    \"')
-            file.write(header.replace('\\', '/'))
+            interface = os.path.join('${PROJECT_SOURCE_DIR}/include', header_file)
+            file.write(interface.replace('\\', '/'))
             file.write('\"\n')
         file.write(')\n\n')
 
