@@ -114,7 +114,8 @@ class CMakeCreator:
             else:
                 headers.add(os.path.basename(header))
             file.write('    \"')
-            interface = os.path.join('${PROJECT_SOURCE_DIR}/include', header_file)
+            interface = os.path.join('${PROJECT_SOURCE_DIR}/include',
+                                     header_file)
             file.write(interface.replace('\\', '/'))
             file.write('\"\n')
         file.write(')\n\n')
@@ -162,8 +163,9 @@ class CMakeCreator:
         file.write('    "$<BUILD_INTERFACE:${project_sources}>"\n')
         file.write('    "$<BUILD_INTERFACE:${public_headers}>")\n\n')
 
-    def __add_includes(self, file, includes, isPublic=False):
+    def __add_includes(self, file, includes, isPublic=False, excludeList=None):
         assert isinstance(file, IOBase)
+        assert isinstance(isPublic, bool)
 
         file.write('target_include_directories(${PROJECT_NAME}\n')
         if isPublic:
@@ -174,6 +176,13 @@ class CMakeCreator:
 
         file.write('  PRIVATE\n')
         for include in includes:
+            isIn = False
+            for exclude in excludeList:
+                isIn = exclude in include
+            if include == '../include':
+                isIn = True
+            if isIn:
+                continue
             file.write('    \"')
             file.write(include.replace('\\', '/'))
             file.write('\"\n')
@@ -291,7 +300,9 @@ class CMakeCreator:
         isPublic = False
         if len(build_data.public_headers) > 0:
             isPublic = True
-        self.__add_includes(file, build_data.list_of_includes, isPublic)
+        excludes = ['qt-4.8.7-stl521', 'win32-msvc2015_d', 'win32-msvc2015_r']
+        self.__add_includes(file, build_data.set_of_includes, isPublic,
+                            excludes)
         if build_data.list_of_lib_paths:
             self.__add_link_dirs(file, build_data.list_of_lib_paths)
         if build_data.list_of_libs:

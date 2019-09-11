@@ -42,15 +42,9 @@ for subproject in subprojects_list:
     fixer.create_file(include_dir, '.ignore')
 
 for key, value in projects.items():
-    print('=======================================')
-    print(key)
-    print(value.list_of_libs)
     value.reevaluate_deps(projects.keys())
-    print(value.list_of_libs)
     cmake = cmakecreator.CMakeCreator()
     cmake.create_project(value.project_path, value)
-
-print(projects.keys())
 
 main_cmake = cmakecreator.CMakeCreator()
 main_cmake.create_main_project(src_path, subprojects_list, 'syndis')

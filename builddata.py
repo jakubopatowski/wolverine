@@ -19,7 +19,7 @@ class BuildData:
         self.target_deps = []
         self.list_of_defines = []
         self.list_of_flags = []
-        self.list_of_includes = []
+        self.set_of_includes = []
         self.list_of_sources = []
         self.public_headers = []
         self.private_headers = []
@@ -86,7 +86,7 @@ class BuildData:
 
     # includes
     def set_includes(self, includes):
-        self.list_of_includes = includes
+        self.set_of_includes = includes
 
     # qt ui
     def set_qt_files(self, uis, qrcs):

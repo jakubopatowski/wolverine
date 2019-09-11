@@ -21,6 +21,7 @@ class MakefileParser:
     entry_pattern = '\\S*'
     exclude = ['.ccls-cache', 'include']
     export_macro = r'#define ([A-Z0-9_]*) __declspec\s*\(\s*dllexport\s*\)'
+    header_file_pat = re.compile(r'\\(\w*\.(hpp|h))')
 
     header_pat = re.compile(r'\w*.(h|hpp)$')
     ui_pat = re.compile(r'\w*.(ui)$')
@@ -81,7 +82,8 @@ class MakefileParser:
 
         return False
 
-    def __get_headers(self, project_path, makefile_path, export_macro):
+    def __get_headers(self, project_path, makefile_path, export_macro,
+                      header_set):
         assert isinstance(project_path, str)
         assert isinstance(makefile_path, str)
 
@@ -90,7 +92,12 @@ class MakefileParser:
         interface_headers = []
 
         files = tools.get_files(project_path, self.header_pat, self.exclude)
+        print(header_set)
         for file in files:
+            header_name = os.path.basename(file)
+            print(header_name)
+            if header_name not in header_set:
+                continue
             header_abs_path = os.path.join(project_path, file)
             header_rel_path = tools.change_rel_path(makefile_path,
                                                     project_path,
@@ -152,10 +159,10 @@ class MakefileParser:
         # includes
         includes = re.findall(self.includes_pattern, makefile_data)
         list_of_includes = re.findall(self.include_pattern, includes[0])
-        includes = []
+        includes = set()
         for include in list_of_includes:
-            includes.append(tools.change_rel_path(makefile_path, project_path,
-                                                  include))
+            includes.add(tools.change_rel_path(makefile_path, project_path,
+                                               include))
 
         result.set_includes(includes)
 
@@ -169,8 +176,13 @@ class MakefileParser:
         result.set_sources(list_of_sources)
 
         # headers
+        header_set = set()
+        matches = self.header_file_pat.finditer(makefile_data)
+        for match in matches:
+            header_set.add(match.group(1))
+
         public, private, interface = self.__get_headers(
-            project_path, makefile_path, macro)
+            project_path, makefile_path, macro, header_set)
         result.set_public_headers(public)
         result.set_private_headers(private)
         result.set_interface_headers(interface)
