@@ -92,10 +92,8 @@ class MakefileParser:
         interface_headers = []
 
         files = tools.get_files(project_path, self.header_pat, self.exclude)
-        print(header_set)
         for file in files:
             header_name = os.path.basename(file)
-            print(header_name)
             if header_name not in header_set:
                 continue
             header_abs_path = os.path.join(project_path, file)

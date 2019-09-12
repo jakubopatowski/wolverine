@@ -65,11 +65,16 @@ class CMakeCreator:
 
         file.write('set(CMAKE_EXPORT_COMPILE_COMMANDS ON)\n\n')
 
-    def __add_sources(self, file, sources):
+    def __add_sources(self, file, sources, excludes):
         assert isinstance(file, IOBase)
 
         file.write('set(project_sources\n')
         for source in sources:
+            isIn = False
+            for exclude in excludes:
+                isIn = exclude in source
+            if isIn:
+                continue
             file.write('    \"')
             source_path = os.path.join('${PROJECT_SOURCE_DIR}', source)
             file.write(source_path.replace('\\', '/'))
@@ -178,8 +183,14 @@ class CMakeCreator:
         for include in includes:
             isIn = False
             for exclude in excludeList:
+                print('INCLUDE: ', include)
+                print('EXCLUDE: ', exclude)
+                print('isIn = ', exclude in include)
                 isIn = exclude in include
+                if isIn:
+                    break
             if include == '../include':
+                print
                 isIn = True
             if isIn:
                 continue
@@ -234,9 +245,10 @@ class CMakeCreator:
 
         if len(list_of_qt_targets) == 0:
             return
+        file.write('set(CMAKE_INCLUDE_CURRENT_DIR ON)\n')
         file.write('set(CMAKE_AUTOMOC ON)\n')
         file.write('set(CMAKE_AUTOUIC ON)\n')
-        file.write('set(CMAKE_INCLUDE_CURRENT_DIR ON)\n')
+        file.write('set(CMAKE_AUTORCC ON)\n')
         file.write('find_package(Qt4 ')
         file.write(qt_ver)
         file.write(' REQUIRED COMPONENTS')
@@ -270,6 +282,17 @@ class CMakeCreator:
         file.write('         NAMESPACE ${PROJECT_NAME}::\n')
         file.write(')\n\n')
 
+    def __add_target_property(self, file, property_name, value):
+        assert isinstance(file, IOBase)
+        assert isinstance(property_name, str)
+        assert isinstance(value, str)
+
+        file.write('set_property(TARGET ${PROJECT_NAME} PROPERTY ')
+        file.write(property_name)
+        file.write(' ')
+        file.write(value)
+        file.write(')\n\n')
+
     def create_project(self, path, build_data):
         assert isinstance(path, str)
         assert isinstance(build_data, builddata.BuildData)
@@ -282,15 +305,17 @@ class CMakeCreator:
 
         self.__prepare_header(file)
         self.__prepare_project(file, build_data.target)
+        self.__add_target(file, build_data.target_type)
         self.__add_qt_support(file, build_data.list_of_qt_targets, '4.8.7')
-        self.__add_sources(file, build_data.list_of_sources)
+        self.__add_target_property(file, 'AUTOMOC', 'ON')
+        cpp_excludes = ['win32-msvc2015_d']
+        self.__add_sources(file, build_data.list_of_sources, cpp_excludes)
         self.__add_headers(file, build_data.public_headers,
                            build_data.private_headers,
                            build_data.interface_headers)
         self.__add_uis(file, build_data.list_of_qt_uis)
         self.__add_qrcs(file, build_data.list_of_qt_qrcs)
         self.__add_dir_mimic(file, build_data.project_path)
-        self.__add_target(file, build_data.target_type)
         self.__add_target_sources(file)
         self.__add_flags(file, build_data.list_of_flags)
         self.__add_defines(file, build_data.list_of_defines)
@@ -300,9 +325,10 @@ class CMakeCreator:
         isPublic = False
         if len(build_data.public_headers) > 0:
             isPublic = True
-        excludes = ['qt-4.8.7-stl521', 'win32-msvc2015_d', 'win32-msvc2015_r']
+        header_excludes = ['qt-4.8.7-stl521', 'win32-msvc2015_d',
+                           'win32-msvc2015_r']
         self.__add_includes(file, build_data.set_of_includes, isPublic,
-                            excludes)
+                            header_excludes)
         if build_data.list_of_lib_paths:
             self.__add_link_dirs(file, build_data.list_of_lib_paths)
         if build_data.list_of_libs:
