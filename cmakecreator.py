@@ -41,12 +41,19 @@ class CMakeCreator:
     def __add_dir_mimic(self, file, project_path):
         assert isinstance(file, IOBase)
         assert isinstance(project_path, str)
-
+        # source
         file.write('source_group(TREE ')
         path = os.path.join(project_path, '../..')
         path = os.path.normpath(path)
+        # path = project_path
         file.write(path.replace('\\', '/'))
-        file.write(' PREFIX "Source" FILES ${project_sources})\n\n')
+        file.write(' PREFIX "Sources" FILES ${project_sources})\n')
+        # headers
+        file.write('source_group(TREE ')
+        file.write(path.replace('\\', '/'))
+        file.write(' PREFIX "Public Headers" ')
+        file.write('FILES ${public_headers} ${private_headers} ')
+        file.write('${interface_headers})\n\n')
 
     def __add_defines(self, file, defines):
         assert isinstance(file, IOBase)
@@ -158,15 +165,16 @@ class CMakeCreator:
         assert isinstance(file, IOBase)
 
         file.write('target_sources(${PROJECT_NAME}\n')
-        file.write('  INTERFACE\n')
-        file.write('    "$<BUILD_INTERFACE:${interface_headers}>"\n')
+        # file.write('  INTERFACE\n')
+        # file.write('    "$<BUILD_INTERFACE:${interface_headers}>"\n')
         file.write('  PRIVATE\n')
-        file.write('    ${private_headers}\n')
+        # file.write('    ${private_headers}\n')
         file.write('    ${project_uis}\n')
         file.write('    ${project_qrcs}\n')
-        file.write('  PUBLIC\n')
+        # file.write('  PUBLIC\n')
         file.write('    "$<BUILD_INTERFACE:${project_sources}>"\n')
-        file.write('    "$<BUILD_INTERFACE:${public_headers}>")\n\n')
+        # file.write('    "$<BUILD_INTERFACE:${public_headers}>"\n')
+        file.write(')\n\n')
 
     def __add_includes(self, file, includes, isPublic=False, excludeList=None):
         assert isinstance(file, IOBase)
@@ -181,23 +189,22 @@ class CMakeCreator:
 
         file.write('  PRIVATE\n')
         for include in includes:
+
             isIn = False
             for exclude in excludeList:
-                print('INCLUDE: ', include)
-                print('EXCLUDE: ', exclude)
-                print('isIn = ', exclude in include)
                 isIn = exclude in include
                 if isIn:
                     break
-            if include == '../include':
-                print
-                isIn = True
             if isIn:
                 continue
+            if include == r'../include' or include == r'..\include':
+                continue
+
             file.write('    \"')
             file.write(include.replace('\\', '/'))
             file.write('\"\n')
 
+        file.write('    "../../win32-msvc2015_d/include"\n')
         file.write(')\n\n')
 
     def __add_ccache(self, file):
