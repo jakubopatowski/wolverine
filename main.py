@@ -13,6 +13,8 @@ print(config.sections())
 
 src_path = os.path.join(config['paths']['src_path'])
 build_path = os.path.join(config['paths']['build_path'])
+static_libs = config['projects']['static_libs']
+
 makefile_parser = makefileparser.MakefileParser()
 
 subprojects_list = [name for name in os.listdir(build_path)

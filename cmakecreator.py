@@ -1,6 +1,7 @@
 import builddata
 import os
 from targettype import TargetType
+from librarytype import LibraryType
 from io import IOBase
 
 
@@ -51,7 +52,7 @@ class CMakeCreator:
         # headers
         file.write('source_group(TREE ')
         file.write(path.replace('\\', '/'))
-        file.write(' PREFIX "Public Headers" ')
+        file.write(' PREFIX "Headers" ')
         file.write('FILES ${public_headers} ${private_headers} ')
         file.write('${interface_headers})\n\n')
 
@@ -152,14 +153,20 @@ class CMakeCreator:
             file.write('\"\n')
         file.write(')\n\n')
 
-    def __add_target(self, file, target_type):
+    def add_target(self, file, target_type, lib_type=LibraryType.UNKNOWN):
         assert isinstance(file, IOBase)
         assert isinstance(target_type, TargetType)
 
         if target_type == TargetType.LIBRARY:
-            file.write('add_library(${PROJECT_NAME} "")\n\n')
+            file.write('add_library(${PROJECT_NAME}')
+            if lib_type == LibraryType.SHARED:
+                file.write(' SHARED')
+            elif lib_type == LibraryType.STATIC:
+                file.write(' STATIC')
         elif target_type == TargetType.EXECUTABLE:
-            file.write('add_executable(${PROJECT_NAME} "")\n\n')
+            file.write('add_executable(${PROJECT_NAME}')
+
+        file.write(' "")\n\n')
 
     def __add_target_sources(self, file):
         assert isinstance(file, IOBase)
@@ -300,9 +307,10 @@ class CMakeCreator:
         file.write(value)
         file.write(')\n\n')
 
-    def create_project(self, path, build_data):
+    def create_project(self, path, build_data, lib_type=LibraryType.UNKNOWN):
         assert isinstance(path, str)
         assert isinstance(build_data, builddata.BuildData)
+        assert isinstance(lib_type, LibraryType)
 
         if(not os.path.exists(path)):
             print('WARNING: ', path, ' does not exists!')
@@ -312,7 +320,7 @@ class CMakeCreator:
 
         self.__prepare_header(file)
         self.__prepare_project(file, build_data.target)
-        self.__add_target(file, build_data.target_type)
+        self.add_target(file, build_data.target_type)
         self.__add_qt_support(file, build_data.list_of_qt_targets, '4.8.7')
         self.__add_target_property(file, 'AUTOMOC', 'ON')
         cpp_excludes = ['win32-msvc2015_d']
