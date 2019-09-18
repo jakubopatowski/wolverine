@@ -156,8 +156,13 @@ class CMakeCreator:
     def add_target(self, file, target_type, lib_type=LibraryType.UNKNOWN):
         assert isinstance(file, IOBase)
         assert isinstance(target_type, TargetType)
-
-        if target_type == TargetType.LIBRARY:
+        if target_type == TargetType.UNKNOWN:
+            print('Target typ is unknown!')
+            return
+        elif (
+                target_type == TargetType.LIBRARY or
+                target_type == TargetType.HEADER_LIBRARY
+             ):
             file.write('add_library(${PROJECT_NAME}')
             if lib_type == LibraryType.SHARED:
                 file.write(' SHARED')
@@ -307,10 +312,9 @@ class CMakeCreator:
         file.write(value)
         file.write(')\n\n')
 
-    def create_project(self, path, build_data, lib_type=LibraryType.UNKNOWN):
+    def create_project(self, path, build_data):
         assert isinstance(path, str)
         assert isinstance(build_data, builddata.BuildData)
-        assert isinstance(lib_type, LibraryType)
 
         if(not os.path.exists(path)):
             print('WARNING: ', path, ' does not exists!')
@@ -320,16 +324,21 @@ class CMakeCreator:
 
         self.__prepare_header(file)
         self.__prepare_project(file, build_data.target)
-        self.add_target(file, build_data.target_type)
-        self.__add_qt_support(file, build_data.list_of_qt_targets, '4.8.7')
-        self.__add_target_property(file, 'AUTOMOC', 'ON')
+        self.add_target(file, build_data.target_type, build_data.library_type)
+        if build_data.is_there_qt:
+            self.__add_qt_support(file, build_data.list_of_qt_targets, '4.8.7')
+            self.__add_target_property(file, 'AUTOMOC', 'ON')
+
         cpp_excludes = ['win32-msvc2015_d']
         self.__add_sources(file, build_data.list_of_sources, cpp_excludes)
+
         self.__add_headers(file, build_data.public_headers,
                            build_data.private_headers,
                            build_data.interface_headers)
+
         self.__add_uis(file, build_data.list_of_qt_uis)
         self.__add_qrcs(file, build_data.list_of_qt_qrcs)
+
         self.__add_dir_mimic(file, build_data.project_path)
         self.__add_target_sources(file)
         self.__add_flags(file, build_data.list_of_flags)
