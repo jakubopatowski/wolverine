@@ -1,4 +1,5 @@
 import os
+import ntpath
 from typing import Pattern
 
 
@@ -44,3 +45,11 @@ def get_files(directory, pattern=None, exclude=None, relative_path=False):
             else:
                 result.append(abs_path)
     return result
+
+
+def path_leaf(path):
+    """
+    Return extracted file/dir name from path.
+    """
+    head, tail = ntpath.split(path)
+    return tail or ntpath.basename(head)

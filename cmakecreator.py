@@ -244,9 +244,9 @@ class CMakeCreator:
         file.write('target_link_libraries(${PROJECT_NAME}\n')
         file.write('  PRIVATE\n')
         for lib in libs:
-            file.write('    ')
-            file.write(lib)
-            file.write('\n')
+            file.write('    "')
+            file.write(lib.replace('\\', '/'))
+            file.write('"\n')
 
         file.write(')\n\n')
 

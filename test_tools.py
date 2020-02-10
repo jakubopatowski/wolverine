@@ -35,6 +35,14 @@ class TestTools(unittest.TestCase):
         for item in files:
             print(item)
 
+    def test_path_leaf(self):
+        self.assertEqual(
+            tools.path_leaf('a/b/c'), 'c')
+        self.assertEqual(
+            tools.path_leaf('a/b/c//'), 'c')
+        self.assertEqual(
+            tools.path_leaf('c:\a\b\c.lib'), 'c.lib')
+        
 
 if __name__ == '__main__':
     unittest.main()
