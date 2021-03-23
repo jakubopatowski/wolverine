@@ -181,6 +181,12 @@ class CMakeCreator:
 
         file.write('    "../../win32-msvc2017_d/include"\n')
         file.write('    "../include"\n')
+        file.write('    "../thirdparty/qt-4.8.7-stl521/include/Qt"\n')
+        file.write('    "../thirdparty/qt-4.8.7-stl521/include/QtCore"\n')
+        file.write('    "../thirdparty/qt-4.8.7-stl521/include/QtGui"\n')
+        file.write('    "../thirdparty/qt-4.8.7-stl521/include"\n')
+        file.write('    "../thirdparty/qt-4.8.7-stl521/mkspecs/win32-msvc2017"\n')
+        file.write('    "../thirdparty/qt-4.8.7-stl521/include/Qt3Support"\n')
         file.write(')\n\n')
 
     def __add_ccache(self, file):
