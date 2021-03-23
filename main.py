@@ -15,7 +15,9 @@ print(config.sections())
 src_path = os.path.join(config['paths']['src_path'])
 build_path = os.path.join(config['paths']['build_path'])
 static_libs = config['projects']['static_libs'].split(',')
-build_list = config['projects']['build'].split(',')
+build_list = list()
+if( config.has_option('projects', 'build') == True):
+    build_list = config['projects']['build'].split(',')
 
 # Get list of projects to transform
 makefile_parser = makefileparser.MakefileParser()
