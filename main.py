@@ -15,17 +15,19 @@ print(config.sections())
 src_path = os.path.join(config['paths']['src_path'])
 build_path = os.path.join(config['paths']['build_path'])
 static_libs = config['projects']['static_libs'].split(',')
+build_list = config['projects']['build'].split(',')
 
 # Get list of projects to transform
 makefile_parser = makefileparser.MakefileParser()
-
-# all
-#subprojects_list = [name for name in os.listdir(build_path)
-#                    if os.path.isfile(os.path.join(build_path, name, 'qt4',
-#                                                   'makefile'))]
-
-# just one
-subprojects_list = ["radosc","rvs_sojeeku_wsproxy"]
+subprojects_list = list()
+if (len(build_list) == 0):
+    # all
+    subprojects_list = [name for name in os.listdir(build_path)
+                        if os.path.isfile(os.path.join(build_path, name, 'qt4',
+                                                       'makefile'))]
+else:
+    # just one
+    subprojects_list = build_list
 
 projects = dict()
 
@@ -33,15 +35,15 @@ for subproject in subprojects_list:
     print('=======================================')
     print('transforming: ', subproject)
     makef_path = os.path.join(build_path, subproject, 'qt4', 'makefile')
-    makef_path_qt5 = os.path.join(build_path,subproject,'qt5', 'makefile')
+    makef_path_qt5 = os.path.join(build_path, subproject, 'qt5', 'makefile')
     sub_path = os.path.join(src_path, subproject)
-    
+
     if os.path.isfile(makef_path_qt5) is True:
         makef_path = makef_path_qt5
-    
+
     print(makef_path)
     print(sub_path)
-    
+
     if os.path.isdir(sub_path) is False:
         print("Projekt nie istnieje!")
         continue
