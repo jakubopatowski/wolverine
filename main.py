@@ -12,6 +12,8 @@ config.sections()
 config.read('config.ini')
 print(config.sections())
 
+proj_type = config['build_type']['type']
+proj_bit = config['build_type']['bit']
 src_path = os.path.join(config['paths']['src_path'])
 build_path = os.path.join(config['paths']['build_path'])
 static_libs = config['projects']['static_libs'].split(',')
@@ -52,7 +54,7 @@ for subproject in subprojects_list:
 
     build_data = makefile_parser.parse_file(makef_path, sub_path)
     projects[build_data.target] = build_data
-    fixer = projectfixer.ProjectFixer()
+    # fixer = projectfixer.ProjectFixer()
     # include_dir = os.path.join(sub_path, 'include')
     # shutil.rmtree(include_dir, ignore_errors=True)
     # if len(build_data.public_headers) > 0:
@@ -71,8 +73,8 @@ for key, value in projects.items():
         if key == item:
             print('jest hardcoded na static: ', key)
             value.set_library_type('lib')
-    cmake = cmakecreator.CMakeCreator()
+    cmake = cmakecreator.CMakeCreator(proj_type, proj_bit)
     cmake.create_project(value.project_path, value)
 
-main_cmake = cmakecreator.CMakeCreator()
+main_cmake = cmakecreator.CMakeCreator(proj_type, proj_bit)
 main_cmake.create_main_project(src_path, subprojects_list, 'syndis')

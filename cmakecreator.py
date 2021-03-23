@@ -6,6 +6,14 @@ from io import IOBase
 
 
 class CMakeCreator:
+    def __init__(self, type, bit):
+        self.build_type = type.lower()
+        self.bit_type = bit
+        if (bit != '32' and bit != '64'):
+            print('Podana architektóra projektu różna od 32 i 64!\n')
+        if (type != 'debug' and type != 'release'):
+            print('Podany typ budowy różny od "debug" i "release"!\n')
+
     def __prepare_header(self, file):
         assert isinstance(file, IOBase)
 
@@ -134,9 +142,9 @@ class CMakeCreator:
             print('Target typ is unknown!')
             return
         elif (
-                target_type == TargetType.LIBRARY or
-                target_type == TargetType.HEADER_LIBRARY
-             ):
+            target_type == TargetType.LIBRARY or
+            target_type == TargetType.HEADER_LIBRARY
+        ):
             file.write('add_library(${PROJECT_NAME}')
             if lib_type == LibraryType.SHARED:
                 file.write(' SHARED')
@@ -157,6 +165,18 @@ class CMakeCreator:
         file.write('    ${project_uis}\n')
         file.write('    ${project_qrcs}\n')
         file.write(')\n\n')
+
+    def __get_proper_dir(self):
+        result = 'win'
+        result += self.bit_type
+       
+        result += '-msvc2017_'
+        if (self.build_type == 'debug'):
+            result += 'd'
+        else:
+            result += 'r'
+
+        return result
 
     def __add_includes(self, file, includes, excludeList=None, is_qt4=False, is_qt5=False):
         assert isinstance(file, IOBase)
@@ -180,7 +200,7 @@ class CMakeCreator:
             file.write(include.replace('\\', '/'))
             file.write('\"\n')
 
-        file.write('    "../../win32-msvc2017_d/include"\n')
+        file.write('    "../../' + self.__get_proper_dir() + '/include"\n')
         file.write('    "../include"\n')
         if(is_qt4 == True):
             file.write('    "../thirdparty/qt-4.8.7-stl521/include"\n')
@@ -190,7 +210,7 @@ class CMakeCreator:
             file.write(
                 '    "../thirdparty/qt-4.8.7-stl521/include/Qt3Support"\n')
             file.write(
-                '    "../thirdparty/qt-4.8.7-stl521/mkspecs/win32-msvc2017"\n')
+                '    "../thirdparty/qt-4.8.7-stl521/mkspecs/win' + self.bit_type + '-msvc2017"\n')
 
         if (is_qt5 == True):
             file.write('    "../thirdparty/qt-5.12.5/include"\n')
@@ -199,7 +219,7 @@ class CMakeCreator:
             file.write('    "../thirdparty/qt-5.12.5/include/QtNetwork"\n')
             file.write('    "../thirdparty/qt-5.12.5/include/QtConcurrent"\n')
             file.write('    "../thirdparty/qt-5.12.5/include/QtWebSockets"\n')
-            file.write('    "../thirdparty/qt-5.12.5/mkspecs/win32-msvc2017"\n')
+            file.write('    "../thirdparty/qt-5.12.5/mkspecs/win' + self.bit_type +'-msvc2017"\n')
         file.write(')\n\n')
 
     def __add_ccache(self, file):
@@ -224,12 +244,12 @@ class CMakeCreator:
 
         if (is_qt4 == True):
             file.write('    "')
-            file.write('../win32-msvc2017_d/tools/qt4/lib')
+            file.write('../' + self.__get_proper_dir() + '/tools/qt4/lib')
             file.write('"\n')
 
         if (is_qt5 == True):
             file.write('    "')
-            file.write('../win32-msvc2017_d/tools/qt5/lib')
+            file.write('../' + self.__get_proper_dir() + '/tools/qt5/lib')
             file.write('"\n')
 
         file.write(')\n\n')
@@ -240,7 +260,7 @@ class CMakeCreator:
         file.write('  PRIVATE\n')
         for lib in libs:
             file.write('    "')
-            lib_file=os.path.basename(lib)
+            lib_file = os.path.basename(lib)
             file.write(lib_file.replace('\\', '/'))
             file.write('"\n')
 
@@ -316,7 +336,7 @@ class CMakeCreator:
             print('WARNING: ', path, ' does not exists!')
             return
 
-        file=open(os.path.join(path, 'CMakeLists.txt'), 'w')
+        file = open(os.path.join(path, 'CMakeLists.txt'), 'w')
 
         self.__prepare_header(file)
         self.__prepare_project(file, build_data.target)
@@ -325,7 +345,7 @@ class CMakeCreator:
             self.__add_qt_support(file, build_data.list_of_qt_targets, '4.8.7')
             self.__add_target_property(file, 'AUTOMOC', 'ON')
 
-        cpp_excludes=['win32-msvc2017_d']
+        cpp_excludes = [self.__get_proper_dir()]
         self.__add_sources(file, build_data.list_of_sources, cpp_excludes)
 
         self.__add_headers(file, build_data.public_headers,
@@ -343,7 +363,8 @@ class CMakeCreator:
         # self.__add_ccache(file)
         self.__add_target_features(file)
 
-        header_excludes=['win32-msvc2017_d', 'win32-msvc2017_r']
+        header_excludes = ['win32-msvc2017_d', 'win32-msvc2017_r',
+                           'win64-msvc2017_d', 'win64-msvc2017_r']
         # header_excludes = ['qt-4.8.7-stl521', 'win32-msvc2017_d',
         #                   'win32-msvc2017_r']
         self.__add_includes(file, build_data.set_of_includes,
@@ -363,11 +384,11 @@ class CMakeCreator:
         assert isinstance(path, str)
         assert isinstance(project_name, str)
 
-        file=open(os.path.join(path, 'CMakeLists.txt'), 'w')
+        file = open(os.path.join(path, 'CMakeLists.txt'), 'w')
         self.__prepare_header(file)
         self.__prepare_project(file, 'Syndis')
         for project in subprojects:
-            project_path=os.path.join(path, project)
+            project_path = os.path.join(path, project)
             if os.path.isfile(os.path.join(project_path, 'CMakeLists.txt')):
                 file.write('add_subdirectory(')
                 file.write(project)
