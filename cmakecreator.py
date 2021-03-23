@@ -9,13 +9,8 @@ class CMakeCreator:
     def __prepare_header(self, file):
         assert isinstance(file, IOBase)
 
-        file.write('cmake_minimum_required(VERSION 3.1...3.15)\n')
-        file.write('\n')
-        file.write('if(${CMAKE_VERSION} VERSION_LESS 3.12)\n')
-        file.write('    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}')
-        file.write('.${CMAKE_MINOR_VERSION})\n')
-        file.write('endif()\n\n')
-
+        file.write('cmake_minimum_required(VERSION 3.14)\n\n')
+       
     def __prepare_project(self, file, project_name):
         assert isinstance(file, IOBase)
         assert isinstance(project_name, str)
@@ -89,50 +84,29 @@ class CMakeCreator:
             file.write('\"\n')
         file.write(')\n\n')
 
+    def __add_new_lines(self, file, collection, check_duplicates):
+        for item in collection:
+            #header_file = os.path.basename(item)
+            header_file = item
+            if header_file in check_duplicates:
+                continue
+            else:
+                check_duplicates.add(header_file)
+            file.write('    \"')
+            public = os.path.join('${PROJECT_SOURCE_DIR}', header_file)
+            file.write(public.replace('\\', '/'))
+            file.write('\"\n')
+
     def __add_headers(self, file, public, private, interface):
         assert isinstance(file, IOBase)
 
         headers = set()
-        file.write('set(public_headers\n')
-        for header in public:
-            header_file = os.path.basename(header)
-            if header_file in headers:
-                continue
-            else:
-                headers.add(header_file)
-            file.write('    \"')
-            public = os.path.join('${PROJECT_SOURCE_DIR}/include', header_file)
-            file.write(public.replace('\\', '/'))
-            file.write('\"\n')
+        file.write('set(headers\n')
+        self.__add_new_lines(file, public, headers)
+        self.__add_new_lines(file, private, headers)
+        self.__add_new_lines(file, interface, headers)
         file.write(')\n\n')
-
-        file.write('set(private_headers\n')
-        for header in private:
-            if header == '../include':
-                continue
-            if os.path.basename(header) in headers:
-                continue
-            else:
-                headers.add(os.path.basename(header))
-            file.write('    \"')
-            file.write(header.replace('\\', '/'))
-            file.write('\"\n')
-        file.write(')\n\n')
-
-        file.write('set(interface_headers\n')
-        for header in interface:
-            header_file = os.path.basename(header)
-            if os.path.basename(header) in headers:
-                continue
-            else:
-                headers.add(os.path.basename(header))
-            file.write('    \"')
-            interface = os.path.join('${PROJECT_SOURCE_DIR}/include',
-                                     header_file)
-            file.write(interface.replace('\\', '/'))
-            file.write('\"\n')
-        file.write(')\n\n')
-
+    
     def __add_uis(self, file, uis):
         assert isinstance(file, IOBase)
 
@@ -177,15 +151,11 @@ class CMakeCreator:
         assert isinstance(file, IOBase)
 
         file.write('target_sources(${PROJECT_NAME}\n')
-        # file.write('  INTERFACE\n')
-        # file.write('    "$<BUILD_INTERFACE:${interface_headers}>"\n')
         file.write('  PRIVATE\n')
-        # file.write('    ${private_headers}\n')
+        file.write('    ${project_sources}\n')
+        file.write('    ${headers}\n')
         file.write('    ${project_uis}\n')
         file.write('    ${project_qrcs}\n')
-        # file.write('  PUBLIC\n')
-        file.write('    "$<BUILD_INTERFACE:${project_sources}>"\n')
-        # file.write('    "$<BUILD_INTERFACE:${public_headers}>"\n')
         file.write(')\n\n')
 
     def __add_includes(self, file, includes, isPublic=False, excludeList=None):
@@ -193,15 +163,8 @@ class CMakeCreator:
         assert isinstance(isPublic, bool)
 
         file.write('target_include_directories(${PROJECT_NAME}\n')
-        if isPublic:
-            file.write('  PUBLIC\n')
-            file.write('    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}')
-            file.write('/include>"\n')
-            file.write('    "$<INSTALL_INTERFACE:include>"\n')
-
         file.write('  PRIVATE\n')
         for include in includes:
-
             isIn = False
             for exclude in excludeList:
                 isIn = exclude in include
@@ -216,7 +179,8 @@ class CMakeCreator:
             file.write(include.replace('\\', '/'))
             file.write('\"\n')
 
-        file.write('    "../../win32-msvc2015_d/include"\n')
+        file.write('    "../../win32-msvc2017_d/include"\n')
+        file.write('    "../include"\n')
         file.write(')\n\n')
 
     def __add_ccache(self, file):
@@ -329,7 +293,7 @@ class CMakeCreator:
             self.__add_qt_support(file, build_data.list_of_qt_targets, '4.8.7')
             self.__add_target_property(file, 'AUTOMOC', 'ON')
 
-        cpp_excludes = ['win32-msvc2015_d']
+        cpp_excludes = ['win32-msvc2017_d']
         self.__add_sources(file, build_data.list_of_sources, cpp_excludes)
 
         self.__add_headers(file, build_data.public_headers,
@@ -339,26 +303,27 @@ class CMakeCreator:
         self.__add_uis(file, build_data.list_of_qt_uis)
         self.__add_qrcs(file, build_data.list_of_qt_qrcs)
 
-        self.__add_dir_mimic(file, build_data.project_path)
+        #self.__add_dir_mimic(file, build_data.project_path)
         self.__add_target_sources(file)
         self.__add_flags(file, build_data.list_of_flags)
         self.__add_defines(file, build_data.list_of_defines)
         self.__export_commands(file)
-        self.__add_ccache(file)
+        #self.__add_ccache(file)
         self.__add_target_features(file)
         isPublic = False
         if len(build_data.public_headers) > 0:
             isPublic = True
-        header_excludes = ['qt-4.8.7-stl521', 'win32-msvc2015_d',
-                           'win32-msvc2015_r']
+        header_excludes = ['win32-msvc2017_d', 'win32-msvc2017_r']    
+        #header_excludes = ['qt-4.8.7-stl521', 'win32-msvc2017_d',
+        #                   'win32-msvc2017_r']
         self.__add_includes(file, build_data.set_of_includes, isPublic,
                             header_excludes)
         if build_data.list_of_lib_paths:
             self.__add_link_dirs(file, build_data.list_of_lib_paths)
         if build_data.list_of_libs:
             self.__add_libs(file, build_data.list_of_libs)
-        if build_data.target_type == TargetType.LIBRARY:
-            self.__add_install(file)
+        #if build_data.target_type == TargetType.LIBRARY:
+        #    self.__add_install(file)
         file.close()
 
     def create_main_project(self, path, subprojects, project_name):
