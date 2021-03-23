@@ -25,7 +25,7 @@ makefile_parser = makefileparser.MakefileParser()
 #                                                   'makefile'))]
 
 # just one
-subprojects_list = ["radosc"]
+subprojects_list = ["radosc","rvs_sojeeku_wsproxy"]
 
 projects = dict()
 
@@ -33,9 +33,15 @@ for subproject in subprojects_list:
     print('=======================================')
     print('transforming: ', subproject)
     makef_path = os.path.join(build_path, subproject, 'qt4', 'makefile')
+    makef_path_qt5 = os.path.join(build_path,subproject,'qt5', 'makefile')
     sub_path = os.path.join(src_path, subproject)
+    
+    if os.path.isfile(makef_path_qt5) is True:
+        makef_path = makef_path_qt5
+    
     print(makef_path)
     print(sub_path)
+    
     if os.path.isdir(sub_path) is False:
         print("Projekt nie istnieje!")
         continue
@@ -43,13 +49,13 @@ for subproject in subprojects_list:
     build_data = makefile_parser.parse_file(makef_path, sub_path)
     projects[build_data.target] = build_data
     fixer = projectfixer.ProjectFixer()
-    include_dir = os.path.join(sub_path, 'include')
-    shutil.rmtree(include_dir, ignore_errors=True)
-    if len(build_data.public_headers) > 0:
-        fixer.copy_file(include_dir, build_data.public_headers, sub_path)
-    if len(build_data.interface_headers) > 0:
-        fixer.copy_file(include_dir, build_data.interface_headers, sub_path)
-    fixer.create_file(include_dir, '.ignore')
+    # include_dir = os.path.join(sub_path, 'include')
+    # shutil.rmtree(include_dir, ignore_errors=True)
+    # if len(build_data.public_headers) > 0:
+    #     fixer.copy_file(include_dir, build_data.public_headers, sub_path)
+    # if len(build_data.interface_headers) > 0:
+    #     fixer.copy_file(include_dir, build_data.interface_headers, sub_path)
+    # fixer.create_file(include_dir, '.ignore')
 
 print("Podsumowanie:")
 print("Ogółem projektów: ", len(subprojects_list))

@@ -1,6 +1,6 @@
 from targettype import TargetType
 from librarytype import LibraryType
-
+import os
 
 class BuildData:
     """
@@ -30,19 +30,25 @@ class BuildData:
         self.list_of_lib_paths = []
         self.is_there_boost = False
         self.list_of_boost_libs = []
-        self.is_there_qt = False
+        self.is_there_qt4 = False
+        self.is_there_qt5 = False
         self.list_of_qt_targets = []
         self.list_of_qt_uis = []
         self.list_of_qt_qrcs = []
-        self.__valid_qt_libs = {'QtCore', 'QtGui', 'Qt3Support',
-                                'QtAssistant', 'QtAssistantClient',
-                                'QAxContainer', 'QAxServer', 'QtDBus',
-                                'QtDesigner', 'QtDesignerComponents',
-                                'QtHelp', 'QtMotif', 'QtMultimedia',
-                                'QtNetwork', 'QtNsPlugin', 'QtOpenGL',
-                                'QtScript', 'QtScriptTools', 'QtSql',
-                                'QtSvg', 'QtTest', 'QtUiTools', 'QtWebKit',
-                                'QtXml', 'QtXmlPatterns', 'phonon'}
+        self.__valid_qt4_libs = {'QtCore', 'QtGui', 'Qt3Support',
+                                 'QtAssistant', 'QtAssistantClient',
+                                 'QAxContainer', 'QAxServer', 'QtDBus',
+                                 'QtDesigner', 'QtDesignerComponents',
+                                 'QtHelp', 'QtMotif', 'QtMultimedia',
+                                 'QtNetwork', 'QtNsPlugin', 'QtOpenGL',
+                                 'QtScript', 'QtScriptTools', 'QtSql',
+                                 'QtSvg', 'QtTest', 'QtUiTools', 'QtWebKit',
+                                 'QtXml', 'QtXmlPatterns', 'phonon'}
+        self.__valid_qt5_libs = {'Qt5Core', 'Qt5WebSockets',
+                                 'Qt5Network', 'Qt5Widgets',
+                                 'Qt5WinExtras', 'Qt5UiTools',
+                                 'Qt5Test', 'Qt5QuickWidgets',
+                                 'Qt5NetworkAuth', 'Qt5Concurrent'}
 
     def get_qt_target(self, lib):
         assert isinstance(lib, str)
@@ -53,10 +59,14 @@ class BuildData:
         if '.lib' in lib:
             result = lib.replace('d.lib', '')
             result = result.replace('.lib', '')
-            if result in self.__valid_qt_libs:
-                self.is_there_qt = True
+            if result in self.__valid_qt4_libs:
+                self.is_there_qt4 = True
                 self.list_of_qt_targets.append(result)
-                return 'Qt4::' + result
+                #return 'Qt4::' + result
+            elif result in self.__valid_qt5_libs:
+                self.is_there_qt5 = True
+                self.list_of_qt_targets.append(result)
+                #return 'Qt5::' + result
 
         return lib
 
@@ -117,7 +127,7 @@ class BuildData:
 
     def set_libs(self, libs):
         for item in libs:
-            lib = self.get_qt_target(item)
+            lib = self.get_qt_target(os.path.basename(item))
             self.list_of_libs.append(lib)
 
     def reevaluate_deps(self, projects):

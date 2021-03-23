@@ -13,7 +13,7 @@ class MakefileParser:
     cxx_flags_pattern = 'CXXFLAGS\\s*=\\s(.*)'
     flag_pattern = '(?:^|\\s)([^\\$\\s]\\S*[^\\$\\s])'
     includes_pattern = 'INCPATH\\s*=\\s(.*)'
-    include_pattern = '\\"(\\S*)\\"'
+    include_pattern = '\\-I"*(\\S*)\\"*'
     target_type_pattern = '\\#\\s*Template:\\s*([\\w]*)'
     sources_pattern = 'SOURCES\\s*=\\s*(.*)'
     libs_pattern = 'LIBS\\s*=\\s*(.*)'

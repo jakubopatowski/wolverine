@@ -106,3 +106,6 @@ venv.bak/
 new_makefile
 
 config\.ini
+
+#ide
+.vscode/
