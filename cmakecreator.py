@@ -197,7 +197,7 @@ class CMakeCreator:
                 continue
 
             file.write('    \"')
-            file.write(include.replace('\\', '/'))
+            file.write(include.replace('\\', '/').replace("\"", ""))
             file.write('\"\n')
 
         file.write('    "../../' + self.__get_proper_dir() + '/include"\n')
