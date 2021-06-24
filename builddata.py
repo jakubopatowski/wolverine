@@ -27,7 +27,7 @@ class BuildData:
         self.private_headers = []
         self.interface_headers = []
         self.list_of_libs = []
-        self.list_of_lib_paths = []
+        self.list_of_lib_paths = set()
         self.is_there_boost = False
         self.list_of_boost_libs = []
         self.is_there_qt4 = False
@@ -65,7 +65,7 @@ class BuildData:
                 #return 'Qt4::' + result
             elif result in self.__valid_qt5_libs:
                 self.is_there_qt5 = True
-                self.list_of_qt_targets.append(result)
+                self.list_of_qt_targets.append(result.replace('Qt5',''))
                 #return 'Qt5::' + result
 
         return lib
@@ -128,6 +128,9 @@ class BuildData:
     def set_libs(self, libs):
         for item in libs:
             lib = self.get_qt_target(os.path.basename(item))
+            lib_path = os.path.dirname(item)
+            if lib_path is not '':
+                self.set_lib_paths(lib_path)
             self.list_of_libs.append(lib)
 
     def reevaluate_deps(self, projects):
@@ -138,8 +141,13 @@ class BuildData:
                 id = self.list_of_libs.index(lib)
                 self.list_of_libs[id] = result
 
+    # set libraries paths
     def set_lib_paths(self, lib_paths):
-        self.list_of_lib_paths = lib_paths
+        if isinstance(lib_paths, str):
+            self.list_of_lib_paths.add(lib_paths)
+        elif len(lib_paths) > 1:
+            for item in lib_paths:
+                self.list_of_lib_paths.add(item)
 
     def set_export_macro(self, export_macro):
         self.export_macro = export_macro

@@ -198,11 +198,16 @@ class MakefileParser:
         if not libraries:
             print("There are no libraries!")
         else:
-            library_list = libraries[0].split()
+            string = libraries[0]
+            library_list = re.split('\\s*([^\\s\\"\']+)|\\"([^\\"]*)\\"|\'([^\']*)\'', string)
+            library_list = list(filter(None, library_list))
+            #library_list = string.split()
             libpath_list = []
             libs_list = []
             # print('library_list:', library_list)
             for entry in library_list:
+                if not entry or entry.strip() == '':
+                    continue
                 if re.search('.res', entry) is not None:
                     continue
 
@@ -214,8 +219,8 @@ class MakefileParser:
                     libpath_list.append(tools.change_rel_path(makefile_path,
                                                               project_path,
                                                               path))
-            # print('libs_list:', libs_list)
-            # print('libpath_list:', libpath_list)
+            print('libs_list:', libs_list)
+            print('libpath_list:', libpath_list)
             result.set_libs(libs_list)
             result.set_lib_paths(libpath_list)
 

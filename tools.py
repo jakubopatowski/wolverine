@@ -13,8 +13,8 @@ def change_rel_path(old_path, new_path, rel_file_path):
     assert isinstance(rel_file_path, str)
 
     old_dir = os.path.dirname(old_path)
-    full_path = os.path.normpath(os.path.join(old_dir,
-                                              rel_file_path))
+    full_path = os.path.normpath(os.path.join(old_dir, rel_file_path))
+
     full_path = os.path.relpath(full_path, new_path)
     return full_path
 
