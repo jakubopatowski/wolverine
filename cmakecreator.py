@@ -3,10 +3,12 @@ import os
 from targettype import TargetType
 from librarytype import LibraryType
 from io import IOBase
+import configmanager
 
 
 class CMakeCreator:
     def __init__(self, type, bit):
+        self.config = configmanager.ConfigManager()
         self.build_type = type.lower()
         self.bit_type = bit
         if bit != "32" and bit != "64":
@@ -267,11 +269,11 @@ class CMakeCreator:
         file.write("target_link_libraries(${PROJECT_NAME}\n")
         file.write("  PRIVATE\n")
         for lib in libs:
-            #file.write('    "')
+            # file.write('    "')
             lib_file = os.path.basename(lib)
             file.write(lib_file.replace("\\", "/"))
-            file.write('\n')
-            #file.write('"\n')
+            file.write("\n")
+            # file.write('"\n')
 
         file.write(")\n\n")
 
@@ -294,9 +296,11 @@ class CMakeCreator:
         file.write("set(CMAKE_AUTOUIC ON)\n")
         file.write("set(CMAKE_AUTORCC ON)\n")
 
-        file.write('set(CMAKE_PREFIX_PATH "d:\\\\Qt5\\\\5.12.5\\\\msvc2017")\n')
+        file.write("set(CMAKE_PREFIX_PATH ")
+        file.write(self.config.qt5_path)
+        file.write(")\n")
         file.write("find_package(Qt5 ")
-        file.write(qt_ver)
+        file.write(self.config.qt5_ver)
         file.write(" REQUIRED COMPONENTS")
         for target in list_of_qt_targets:
             if target == "QtWebKit":
